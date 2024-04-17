@@ -1,5 +1,6 @@
 #!/bin/bash
 cd ~/hatRecon/`nd280-system`
+rm plots/*.pdf
 
 ### Default configuration: focused horizontal beam of 600 MeV muonsg
 # Gun type
@@ -14,9 +15,10 @@ DX=1
 DY=1
 DZ=1
 # Direction
-U=0
-V=0
-W=1
+phi=0
+dphi=0
+theta=0
+dtheta=0
 
 # Parallelization 
 index=-999
@@ -83,21 +85,27 @@ while :; do
                 shift
             fi
             ;;
-        -u)
+        --phi)
             if [ "$2" ]; then
-                U=$2
+                phi=$2
                 shift
             fi
             ;;
-        -v)
+        --dphi)
             if [ "$2" ]; then
-                V=$2
+                dphi=$2
                 shift
             fi
             ;;
-        -w)
+        --theta)
             if [ "$2" ]; then
-                W=$2
+                theta=$2
+                shift
+            fi
+            ;;
+        --dtheta)
+            if [ "$2" ]; then
+                dtheta=$2
                 shift
             fi
             ;;
@@ -134,16 +142,14 @@ while :; do
     esac
     shift
 done
-echo "gun_init flags:   -N ${N} ${particle} ${energy} -x ${X} -y ${Y} -z ${Z} --dx ${DX} --dy ${DY} --dz ${DZ} -u ${U} -v ${V} -w ${W}-l ${label} -i ${index} --rm ${rm_flag} -R"
 
 XYZ="${X} ${Y} ${Z}"
-UVW="${U} ${V} ${W}"
 
 log="/sps/t2k/tdaret/public/Output_log/logs_${label}.log"
 
 # Particle gun
 gun_output="/sps/t2k/tdaret/public/Output_root/MC/1_gun_${label}.root"
-gun_flags=(-p "${XYZ}" "${N}" -a -x "${DX} cm" -y "${DY} cm" -z "${DZ} cm" -n ${gun_output} -- "${particle}" "${energy}" "${U}" "${V}" "${W}")
+gun_flags=(-p "${XYZ}" "${N}" -x "${DX} cm" -y "${DY} cm" -z "${DZ} cm" -n ${gun_output} -- "${particle}" "${energy}" "${phi}" "${dphi}" "${theta}" "${dtheta}")
 echo "logs:             ${log}"
 echo "gun_flags:        ${gun_flags[@]}"
 echo "gun_output:       ${gun_output}"
@@ -166,8 +172,8 @@ echo -e "\n--- STEP 3:    HATRECON    ---" >> "${log}"
 TreeMaker_output="/sps/t2k/tdaret/public/Output_root/TreeMaker_${label}.root"
 echo "TreeMaker_output: ${TreeMaker_output}"
 echo -e "\n--- STEP 4:    TREEMAKER   ---" >> "${log}"
-./bin/HATRECONTREEMAKER.exe -O outfile=${TreeMaker_output} ${HATRecon_output} -R &>> ${log}
+# ./bin/HATRECONTREEMAKER.exe -O outfile=${TreeMaker_output} ${HATRecon_output} -R &>> ${log}
 
 if $rm_flag; then
-    rm ${HATRecon_output} ${DetResSim_output} ${gun_output} ${log}
+    rm ${HATRecon_output} ${DetResSim_output} ${gun_output} #${log}
 fi

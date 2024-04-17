@@ -68,21 +68,21 @@ energy="600"
 # Position
 # bHAT: (DX, DY, DZ) = (±102, ±41, ±93) cm
 # center of bHAT:       (X, Y, Z) = (0,   -75, -200) cm
-# diagonal from above:  (X, Y, Z) = (-50, -30, -200) cm
-X=50
+X=0
 Y=-30
 Z=-200
-DX=1
+DX=20
 DY=1
-DZ=50
+DZ=75
 
 # Direction
-U=0
-V=-1
-W=0
-label="MC_${particle}_${energy}MeV_${X}pm${DX}_${Y}pm${DY}_${Z}pm${DZ}_${U}${V}${W}"
+phi=-90
+dphi=20
+theta=0
+dtheta=10
+label="MC_${particle}_${energy}MeV_x${X}_y${Y}_z${Z}_phi${phi}_theta${theta}"
 
-flags="-p $particle -e $energy -x $X -y $Y -z $Z --dx $DX --dy $DY --dz $DZ -u $U -v $V -w $W"
+flags="-p $particle -e $energy -x $X -y $Y -z $Z --dx $DX --dy $DY --dz $DZ --phi $phi --dphi $dphi --theta $theta --dtheta $dtheta"
 if [ "$tag" != "" ]; then
   flags="${flags} -t $tag"
 fi

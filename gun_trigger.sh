@@ -1,18 +1,18 @@
 #!/bin/sh
 #
+# Based on /pbs/throng/t2k/nd280Software_14.18/nd280Geant4Sim_7.6/inputs/sim-particule-gun.sh
+#
 # Generate a particle gun with vertices distributed in a box around the central
-#   position.  This can generate one or more particles starting from the vertex
-#   (only one vertex per event).  With one particle, this is basically just a
-#   complicated script to make a simple particle gun.
+# position.  This can generate one or more particles starting from the vertex
+# (only one vertex per event).  With one particle, this is basically just a
+# complicated script to make a simple particle gun.
 #
-# This takes a bunch of parameters:
-#
-# sim-particle-gun.sh <options> [baseline] [count] \
-#                       [particle] [energy] [dx] [dy] [dz] \
-#                       { [particle] [energy] [dx] [dy] [dz] } \
+# gun_trigger.sh <options> [baseline] [count] \
+#                       [particle] [energy] [dphi] [theta] [dtheta] \ 
+# The last 6 positionnal arguments can be repeated to generate several particles
 #
 #     baseline -- The name of the macro describing the geometry (typically
-#           "baseline-2022" for the upgrade and "baseline" for everything
+#           "baseline-2023" for the upgrade and "baseline" for everything
 #           else).
 #
 #     count -- The number of events to generate.
@@ -23,33 +23,16 @@
 #     energy -- The kinetic energy of the particle in MeV.  A range of
 #           energy can be specified as "low-high".
 #
-#     dx dy dz -- The direction for the particle.
-#
-#  The last five arguments can be repeated ad nauseum.
+#     phi theta -- The direction for the particle.
 #
 #  OPTIONS:
 #
 #    -p -- Set the central position (e.g. -p "0 0 0 cm")
-#             Important approximately central positions --
-#                                 SFG or P0D: "0 0 -230 cm"
-#                                    top HAT: "0 50 -230 cm"
-#                                    bot HAT: "0 -50 -230 cm"
-#                                       FGD1: "0 0 20 cm"
-#                                       FGD2: "0 0 165 cm"
 #    -s -- DO NOT set the seed from the time.
 #    -n -- Set the name field for the output file
-#    -x -- Set the half x for a box around the position (e.g. -x "5 cm")
-#    -y -- Set the half y for a box around the position (e.g. -y "5 cm")
-#    -z -- Set the half z for a box around the position (e.g. -z "5 cm")
-#
-# EXAMPLE 2
-#
-# Make 10 fake QE like events (mu- and proton).  The muon is along the
-# Z axis, and the proton is along the X axis.  The muon energy is
-# between 400 MeV and 700 MeV.
-#
-#   sim-particle-gun.sh baseline-2022 10 mu- 400-700 0 0 1 proton 200 1 0 0
-#
+#    -x -- margin in this direction around the position provided (e.g. -x "5 cm")
+#    -y -- margin in this direction around the position provided (e.g. -y "5 cm")
+#    -z -- margin in this direction around the position provided (e.g. -z "5 cm")
 
 if ! which ND280GEANT4SIM.exe; then
     echo
@@ -59,20 +42,18 @@ if ! which ND280GEANT4SIM.exe; then
     exit 1
 fi
 
-# Set a default position in the P0D or superFGD (yes, I'm biased).
-APPLY="no"
-POSITION="0 0 -230 cm"
+# Set a default position the center of the bottom HATPC
 SEED_OPTION="-s"
-# SUFFIX=""
-HALFX="25 cm"
-HALFY="5 cm"
-HALFZ="30 cm"
+POSITION="0 -75 -200 cm"
+HALFX="1 cm"
+HALFY="1 cm"
+HALFZ="1 cm"
 
 # A variable to build the file name.
 NAME=""
 
 # Handle any input arguments
-TEMP=$(getopt -o 'ap:sS:x:y:z:n:' -n "$0" -- "$@")
+TEMP=$(getopt -o 'p:s:x:y:z:n:' -n "$0" -- "$@")
 if [ $? -ne 0 ]; then
     echo "Error ..."
     exit 1
@@ -81,10 +62,6 @@ eval set -- "$TEMP"
 unset TEMP
 while true; do
     case "$1" in
-	'-a')
-	    APPLY="yes"
-	    shift
-	    continue;;
 	'-p')
 	    POSITION="$2"
 	    shift
@@ -94,11 +71,6 @@ while true; do
             SEED_OPTION=""
             shift
             continue;;
-	'-S')
-	    SUFFIX="_$2"
-	    shift
-	    shift
-	    continue;;
 	'-x')
 	    HALFX="$2"
 	    shift
@@ -165,15 +137,6 @@ while [ "x$1" != x ]; do
     KE=$1
     shift
 
-    # DX=$1
-    # shift
-
-    # DY=$1
-    # shift
-
-    # DZ=$1
-    # shift
-
     PHI=$1
     shift
 
@@ -186,9 +149,7 @@ while [ "x$1" != x ]; do
     DTHETA=$1
     shift
 
-    # echo "#>> '${PARTICLE}' @ '${KE}' MeV KE -> ('${DX}','${DY}','${DZ}')"
-    echo "#>> '${PARTICLE}' @ '${KE}' MeV KE -> ('${PHI}±${DPHI}','${THETA}±${DTHETA}')"
-    # NAME="${NAME}_${PARTICLE}_${KE}MeV"
+    echo "#>> '${PARTICLE}' @ '${KE}' MeV -> (phi='${PHI}±${DPHI}',theta='${THETA}±${DTHETA}')"
 
     SRC=$(($SRC + 1))
 
@@ -196,11 +157,14 @@ while [ "x$1" != x ]; do
     cat >> $MACRO <<EOF
 /gps/source/add $SRC
 /gps/particle ${PARTICLE}
-# /gps/direction ${DX} ${DY} ${DZ}
-/gps/ang/mintheta ${PHI}-${DPHI} deg #theta and phi are inverted in ND280 geometry
-/gps/ang/maxtheta ${PHI}+${DPHI} deg
-/gps/ang/minphi ${THETA}-${DTHETA} deg
-/gps/ang/maxphi ${THETA}+${DTHETA} deg
+/gps/ang/type iso
+/gps/ang/mintheta $((90 + ${THETA} - ${DTHETA})) deg
+/gps/ang/maxtheta $((90 + ${THETA} + ${DTHETA})) deg
+/gps/ang/minphi $((${PHI} - ${DPHI})) deg
+/gps/ang/maxphi $((${PHI} + ${DPHI})) deg
+# Tampering the geometry to match the ND280 coordinate and angle system
+/gps/ang/rot1 0 0 -1
+/gps/ang/rot2 0 -1 0
 EOF
 
     # Parse the KE to see if there is a range.
@@ -259,28 +223,22 @@ cat >> $MACRO <<EOF
 /run/beamOn ${COUNT}
 EOF
 
-# OUTPUT=gun${NAME}${SUFFIX}_g4mc
-# echo "#   Output file '${OUTPUT}.root'"
-echo "#   Output file '${NAME}'"
-
-if [ ${APPLY} = "no" ]; then
-    echo "ADD '-a' TO PROCESS EVENTS"
-    echo "   See the macro in $MACRO which must be removed by hand."
-    exit 1
-fi
-
-# if [ -f "${OUTPUT}.root" ]; then
-    # echo "Must remove '${OUTPUT}.root' by hand"
+echo "#   Output file: '${NAME}'"
 if [ -f "${NAME}" ]; then
     echo "Must remove '${NAME}' by hand"
     rm $MACRO
     exit 1
 fi
+
 NAME="${NAME%.root}"
 echo "SEED_OPTION: ${SEED_OPTION}"
 echo "NAME: ${NAME}"
 echo "MACRO: ${MACRO}"
-# ND280GEANT4SIM.exe ${SEED_OPTION} -o $OUTPUT $MACRO
 ND280GEANT4SIM.exe ${SEED_OPTION} -o $NAME $MACRO
 
 rm $MACRO
+
+# /gps/ang/mintheta $((270 + ${PHI} - ${DPHI})) deg #theta and phi are inverted in ND280 geometry
+# /gps/ang/maxtheta $((270 + ${PHI} + ${DPHI})) deg
+# /gps/ang/minphi $((180 + ${THETA} - ${DPHI})) deg
+# /gps/ang/maxphi $((180 + ${THETA} + ${DTHETA})) deg
