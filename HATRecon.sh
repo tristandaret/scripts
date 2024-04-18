@@ -7,31 +7,54 @@ cd ~/hatRecon/`nd280-system`
 # Number of events
 start=0 # starting from event #
 nevent=0 # total number of events processed
+tag=""
+rm_flag = false
 
 # Parse command-line arguments
-while getopts ":s:n:d:t:" opt; do
-  case $opt in
-    s)
-      start="$OPTARG"
+while :; do
+  case $1 in
+    -s)
+      if [ "$2" ]; then
+        start=$2
+        shift
+      fi
       ;;
-    n)
-      nevent="$OPTARG"
+    -n)
+      if [ "$2" ]; then
+        nevent=$2
+        shift
+      fi 
       ;;
-    d)
-      datatag="$OPTARG"
+    -d)
+      if [ "$2" ]; then
+        datatag=$2
+        shift
+      fi
       ;;
-    t)
-      tag="$OPTARG"
+    -t)
+      if [ "$2" ]; then
+        tag=$2
+        shift
+      fi
       ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
+    --rm)
+      rm_flag=true
+      ;;
+    --) # End of all options
+      shift
+      break
+      ;;
+    -?*) # Unknown option
+      printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
+      ;;
+    -*) # Missing argument
+      printf 'ERROR: Option requires an argument: %s\n' "$1" >&2
       exit 1
       ;;
-    :)
-      echo "Option -$OPTARG requires an argument." >&2
-      exit 1
-      ;;
+    *) # No more options
+      break
   esac
+  shift
 done
 
 # Check if -d and -t flags are provided
@@ -54,15 +77,13 @@ fi
 # datafile="/sps/t2k/ND280upDataCosmics/magnetON/${datatag}.mid.gz"
 # datafile="/sps/t2k/ND280upDataCosmics/magnetOFF/${datatag}.mid.gz"
 
-echo "File used: ${datafile}"
-
+echo "File used:        ${datafile}"
 
 # Output file names
-hatrecon_output_root="/sps/t2k/tdaret/public/Output_root/HATRecon_${tag}.root"
-hatrecon_output_root_ref0="/sps/t2k/tdaret/public/Output_root/HATRecon_${datatag}_n1.root"
-hatrecon_output_log="/sps/t2k/tdaret/public/Output_log/HATRecon_${tag}.log"
-treemaker_output_root="/sps/t2k/tdaret/public/Output_root/TreeMaker_${tag}.root"
-treemaker_output_log="/sps/t2k/tdaret/public/Output_log/TreeMaker_${tag}.log"
+hatrecon_output="$HOME/public/Output_root/HATRecon_${tag}.root"
+treemaker_output="$HOME/public/Output_root/TreeMaker_${tag}.root"
+log="$HOME/public/Output_log/logs_${tag}.log"
+echo "logs:             ${log}"
 
 
 flags="-R"
@@ -75,22 +96,34 @@ if [ "$nevent" -ne 0 ]; then
   flags="${flags} -n ${nevent}"
 fi
 
-geometry_root="/sps/t2k/uvirgine/Work/nd280_Software/anaCosmics20231002/geometry.root"
-echo "Running with JPARC cosmics geometry ${geometry_root}"
-echo "HATRecon tag: ${tag}"
-echo "HATRecon flags: ${flags}"
-echo "Running: HATRecon"
-# ./bin/HATRECON.exe -G ${geometry_root} -m ${datafile} -o ${hatrecon_output_root} ${flags} &> ${hatrecon_output_log}
-./bin/HATRECON.exe ${datafile} -o ${hatrecon_output_root} ${flags} &> ${hatrecon_output_log}
-if [ "$nevent" -ne 1 ]; then
-  if [[ ${datatag} == *"hatTop_cosmic"* ]]; then
-    hadd -a ${hatrecon_output_root} ${hatrecon_output_root_ref0}
-  fi
-  echo "Running: TreeMaker"
-  echo "treemaker_output_root: ${treemaker_output_root}"
-  echo "treemaker_output_log: ${treemaker_output_log}"
-  echo "hatrecon_output_root: ${hatrecon_output_root}"
-  echo "hatrecon_output_log: ${hatrecon_output_log}"
-  ./bin/HATRECONTREEMAKER.exe -R -O outfile=${treemaker_output_root} ${hatrecon_output_root} &> ${treemaker_output_log}
+
+echo "Running:          HATRecon"
+echo "HATRecon flags:   ${flags}"
+echo "HATRecon output:  ${hatrecon_output}"
+echo "---    HATRECON    ---" > "${log}"
+if [[ ${tag} == *"MC"* ]]; then
+  ./bin/HATRECON.exe ${datafile} -o ${hatrecon_output} ${flags} &>> ${log} # MC data
+else
+  geometry="/sps/t2k/uvirgine/Work/nd280_Software/anaCosmics20231002/geometry.root"
+  echo "Geometry:         ${geometry}"
+  ./bin/HATRECON.exe -G ${geometry} -m ${datafile} -o ${hatrecon_output} ${flags} &>> ${log} # real data
 fi
-# ./bin/HATRECONTREEMAKER.exe -R -O outfile=${treemaker_output_root} ${hatrecon_output_root} &> ${treemaker_output_log}
+
+echo "Running: TreeMaker"
+echo "TreeMaker output: ${treemaker_output}"
+echo -e "\n---   TREEMAKER   ---" >> "${log}"
+./bin/HATRECONTREEMAKER.exe -R -O outfile=${treemaker_output} ${hatrecon_output} &>> ${log}
+
+if [[ "$rm_flag" = true ]]; then
+  echo "in remove condition"
+  rm ${hatrecon_output} ${log}
+fi
+
+
+# hatrecon_output_ref0="$HOME/public/Output_root/HATRecon_${datatag}_n1.root"
+# if [ "$nevent" -ne 1 ]; then
+#   if [[ ${datatag} == *"hatTop_cosmic"* ]]; then
+#     hadd -a ${hatrecon_output} ${hatrecon_output_ref0}
+#   fi
+#   ./bin/HATRECONTREEMAKER.exe -R -O outfile=${treemaker_output} ${hatrecon_output} &> ${treemaker_output_log}
+# fi

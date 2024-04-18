@@ -24,6 +24,7 @@
 #           energy can be specified as "low-high".
 #
 #     phi theta -- The direction for the particle.
+#     dphi dtheta -- The range of tolerance for the direction
 #
 #  OPTIONS:
 #
@@ -42,73 +43,87 @@ if ! which ND280GEANT4SIM.exe; then
     exit 1
 fi
 
-# Set a default position the center of the bottom HATPC
+# Default position: center of the bottom HATPC
 SEED_OPTION="-s"
 POSITION="0 -75 -200 cm"
+# Volume of the vertex
 HALFX="1 cm"
 HALFY="1 cm"
 HALFZ="1 cm"
+COUNT=10
+BASELINE="baseline-2023"
 
 # A variable to build the file name.
 NAME=""
-
-# Handle any input arguments
-TEMP=$(getopt -o 'p:s:x:y:z:n:' -n "$0" -- "$@")
-if [ $? -ne 0 ]; then
-    echo "Error ..."
-    exit 1
-fi
-eval set -- "$TEMP"
-unset TEMP
-while true; do
-    case "$1" in
-	'-p')
-	    POSITION="$2"
-	    shift
-	    shift
-	    continue;;
-        '-s')
-            SEED_OPTION=""
+while :; do
+    case $1 in
+        -b)
+            if [ "$2" ]; then
+                BASELINE=$2
+                shift
+            fi
+            ;;
+        -N)
+            if [ "$2" ]; then
+                COUNT=$2
+                shift
+            fi
+            ;;
+        -x)
+            if [ "$2" ]; then
+                X=$2
+                shift
+            fi
+            ;;
+        -y)
+            if [ "$2" ]; then
+                Y=$2
+                shift
+            fi
+            ;;
+        -z)
+            if [ "$2" ]; then
+                Z=$2
+                shift
+            fi
+            ;;
+        --dx)
+            if [ "$2" ]; then
+                HALFX="$2 cm"
+                shift
+            fi
+            ;;
+        --dy)
+            if [ "$2" ]; then
+                HALFY="$2 cm"
+                shift
+            fi
+            ;;
+        --dz)
+            if [ "$2" ]; then
+                HALFZ="$2 cm"
+                shift
+            fi
+            ;;
+        -n)
+            if [ "$2" ]; then
+                NAME=$2
+                shift
+            fi
+            ;;
+        --) # End of all options
             shift
-            continue;;
-	'-x')
-	    HALFX="$2"
-	    shift
-	    shift
-	    continue;;
-	'-y')
-	    HALFY="$2"
-	    shift
-	    shift
-	    continue;;
-	'-z')
-	    HALFZ="$2"
-	    shift
-	    shift
-	    continue;;
-	'-n')
-	    NAME="$2"
-	    shift
-        shift
-	    continue;;
-	'--')
-	    shift
-	    break;
+            break
+            ;;
+        -?*) # Unknown option
+            printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
+            ;;
+        *) # No more options
+            break
     esac
+    shift
 done
-
-
-BASELINE=$1
-shift
-if [ "${BASELINE}"x = x ] ; then
-    BASELINE=baseline-2023;
-fi
-
-COUNT=$1
-shift
-if [ "${COUNT}"x = x ] ; then
-    COUNT=10;
-fi
+POSITION="${X} ${Y} ${Z} cm"
 
 echo "#   Generate '$COUNT' events"
 echo "#   Geometry '$BASELINE'"
@@ -128,7 +143,7 @@ cat >> $MACRO <<EOF
 /gps/source/multiplevertex true
 EOF
 
-# Add the particles to the particle bomb.
+# Add the particles
 SRC=0
 while [ "x$1" != x ]; do
     PARTICLE=$1
@@ -162,10 +177,11 @@ while [ "x$1" != x ]; do
 /gps/ang/maxtheta $((90 + ${THETA} + ${DTHETA})) deg
 /gps/ang/minphi $((${PHI} - ${DPHI})) deg
 /gps/ang/maxphi $((${PHI} + ${DPHI})) deg
-# Tampering the geometry to match the ND280 coordinate and angle system
 /gps/ang/rot1 0 0 -1
 /gps/ang/rot2 0 -1 0
 EOF
+# Last two lines tamper the geometry to match the ND280 referential and angle system
+
 
     # Parse the KE to see if there is a range.
     KE1=""
@@ -237,8 +253,3 @@ echo "MACRO: ${MACRO}"
 ND280GEANT4SIM.exe ${SEED_OPTION} -o $NAME $MACRO
 
 rm $MACRO
-
-# /gps/ang/mintheta $((270 + ${PHI} - ${DPHI})) deg #theta and phi are inverted in ND280 geometry
-# /gps/ang/maxtheta $((270 + ${PHI} + ${DPHI})) deg
-# /gps/ang/minphi $((180 + ${THETA} - ${DPHI})) deg
-# /gps/ang/maxphi $((180 + ${THETA} + ${DTHETA})) deg

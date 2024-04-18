@@ -1,6 +1,5 @@
 #!/bin/bash
 cd ~/hatRecon/`nd280-system`
-rm plots/*.pdf
 
 ### Default configuration: focused horizontal beam of 600 MeV muonsg
 # Gun type
@@ -145,35 +144,35 @@ done
 
 XYZ="${X} ${Y} ${Z}"
 
-log="/sps/t2k/tdaret/public/Output_log/logs_${label}.log"
+log="$HOME/public/Output_log/logs_${label}.log"
 
 # Particle gun
-gun_output="/sps/t2k/tdaret/public/Output_root/MC/1_gun_${label}.root"
-gun_flags=(-p "${XYZ}" "${N}" -x "${DX} cm" -y "${DY} cm" -z "${DZ} cm" -n ${gun_output} -- "${particle}" "${energy}" "${phi}" "${dphi}" "${theta}" "${dtheta}")
+gun_output="$HOME/public/Output_root/MC/1_gun_${label}.root"
+gun_flags=(-b baseline-2023 -N "${N}" -x "${X}" -y "${Y}" -z "${Z}" --dx "${DX}" --dy "${DY}" --dz "${DZ}" -n "${gun_output}" -- "${particle}" "${energy}" "${phi}" "${dphi}" "${theta}" "${dtheta}")
 echo "logs:             ${log}"
 echo "gun_flags:        ${gun_flags[@]}"
 echo "gun_output:       ${gun_output}"
 echo "--- STEP 1:  PARTICLE GUN  ---" > "${log}"
-~/scripts/gun_trigger.sh baseline-2023 "${gun_flags[@]}" &>> "${log}"
+~/scripts/gun_trigger.sh "${gun_flags[@]}" &>> "${log}"
 
 # DetResponseSim
-DetResSim_output="/sps/t2k/tdaret/public/Output_root/MC/2_DetResSim_${label}.root"
+DetResSim_output="$HOME/public/data/MC/2_DetResSim_${label}.root"
 echo "DetResSim_output: ${DetResSim_output}"
 echo -e "\n--- STEP 2: DETRESPONSESIM ---" >> "${log}"
-DETRESPONSESIM.exe -o ${DetResSim_output} ${gun_output} -R &>> ${log}
+DETRESPONSESIM.exe ${gun_output} -o ${DetResSim_output} -R &>> ${log}
 
 # HATRecon
-HATRecon_output="/sps/t2k/tdaret/public/Output_root/MC/3_HATRecon_${label}.root"
+HATRecon_output="$HOME/public/Output_root/MC/3_HATRecon_${label}.root"
 echo "HATRecon_output:  ${HATRecon_output}"
 echo -e "\n--- STEP 3:    HATRECON    ---" >> "${log}"
 ./bin/HATRECON.exe ${DetResSim_output} -o ${HATRecon_output} -R &>> ${log}
 
 # TreeMaker
-TreeMaker_output="/sps/t2k/tdaret/public/Output_root/TreeMaker_${label}.root"
+TreeMaker_output="$HOME/public/Output_root/TreeMaker_${label}.root"
 echo "TreeMaker_output: ${TreeMaker_output}"
 echo -e "\n--- STEP 4:    TREEMAKER   ---" >> "${log}"
-# ./bin/HATRECONTREEMAKER.exe -O outfile=${TreeMaker_output} ${HATRecon_output} -R &>> ${log}
+./bin/HATRECONTREEMAKER.exe ${HATRecon_output} -O outfile=${TreeMaker_output} -R &>> ${log}
 
-if $rm_flag; then
-    rm ${HATRecon_output} ${DetResSim_output} ${gun_output} #${log}
+if [[ "$rm_flag" = true ]]; then
+    rm ${HATRecon_output} ${gun_output} #${DetResSim_output} #${log}
 fi

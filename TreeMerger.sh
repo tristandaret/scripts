@@ -1,18 +1,21 @@
 #!/bin/bash
-#flags (mandatory): -t tag -f files to merge
+#flags (mandatory): -t tag -f files to merge -n output prefix
 
 source /pbs/throng/t2k/t2k_setup.sh
 pbs_nd280 14.18
 
 
 # Parse command-line arguments
-while getopts ":t:f:" opt; do
+while getopts ":t:f:n:" opt; do
   case $opt in
     t)
       tag="$OPTARG"
       ;;
     f)
-      files_treemaker="$OPTARG"
+      files_tomerge="$OPTARG"
+      ;;
+    n)
+      output_name="$OPTARG"
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -25,11 +28,6 @@ while getopts ":t:f:" opt; do
   esac
 done
 
-hadd -f /sps/t2k/tdaret/public/Output_root/TreeMaker_${tag}.root ${files_treemaker}
-
-files_hatrecon=$(echo "$files_treemaker" | sed 's/TreeMaker/HATRecon/g')
-files_treemaker_log=$(echo "$files_treemaker" | sed 's/root/log/g')
-files_hatrecon_log=$(echo "$files_hatrecon" | sed 's/root/log/g')
-
-echo "TreeMaker files: ${files_treemaker}"
-rm ${files_treemaker} ${files_hatrecon} ${files_treemaker_log} ${files_hatrecon_log}
+echo "Files to merge: ${files_tomerge}"
+hadd -f $HOME/${output_name}_${tag}.root ${files_tomerge}
+rm ${files_tomerge}

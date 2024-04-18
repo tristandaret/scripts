@@ -1,5 +1,6 @@
 #!/bin/bash
 rm -f $HOME/slurm-*.out
+rm -f $HOME/plots/*.pdf
 
 # Default values of flags
 N=2000      # number of events
@@ -30,18 +31,21 @@ while :; do
         shift
       fi
       ;;
-    --) # End of all options
-      shift
-      break
-      ;;
-    --test)
-      machine="flash"
+    --machine)
+      if [ "$2" ]; then
+        machine=$2
+        shift
+      fi
       ;;
     --make)
       make_flag=true
       ;;
     --rm)
       rm_flag=true
+      ;;
+    --) # End of all options
+      shift
+      break
       ;;
     -?*) # Unknown option
       printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
@@ -66,20 +70,23 @@ particle="mu-"
 energy="600"
 
 # Position
+#(Xmin, Xmax) = 
+#(Ymin, Ymax) =
+#(Zmin, Zmax) = (X, -110) cm
 # bHAT: (DX, DY, DZ) = (±102, ±41, ±93) cm
 # center of bHAT:       (X, Y, Z) = (0,   -75, -200) cm
-X=0
+X=50
 Y=-30
-Z=-200
-DX=20
-DY=1
-DZ=75
+Z=-280
+DX=0
+DY=0
+DZ=0
 
 # Direction
 phi=-90
-dphi=20
+dphi=0
 theta=0
-dtheta=10
+dtheta=0
 label="MC_${particle}_${energy}MeV_x${X}_y${Y}_z${Z}_phi${phi}_theta${theta}"
 
 flags="-p $particle -e $energy -x $X -y $Y -z $Z --dx $DX --dy $DY --dz $DZ --phi $phi --dphi $dphi --theta $theta --dtheta $dtheta"
@@ -104,7 +111,7 @@ fi
 ### RUNNING ###
 # Interactive console
 if [ $n -eq 0 ]; then
-  echo "STARTING: Particle guns of ${N} events in interactive console"
+  echo "STARTING: Particle guns of ${N} events in interactive shell"
   flags="${flags} -l ${label}"
   ./scripts/gun_init.sh ${flags}
 
@@ -119,8 +126,10 @@ else
       flags_job="${flags} -i ${i} -l ${label_job_here}"
       job_mc=$(sbatch -t 1:00:00 -n 1 --mem 3GB --account t2k -p ${machine} ./scripts/gun_init.sh ${flags_job})
       job_mc_id="${job_mc_id}:$(echo $job_mc | awk '{print $NF}')"
+      files_data="${files_data} /sps/t2k/tdaret/public/Output_root/MC/2_DetResSim_${label_job_here}.root"
       files_treemaker="${files_treemaker} /sps/t2k/tdaret/public/Output_root/TreeMaker_${label_job_here}.root"
     done
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id ./scripts/TreeMerger.sh -t ${label} -f "${files_treemaker}"
+    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id ./scripts/TreeMerger.sh -t ${label} -f "${files_data}" -n public/data/MC/Data
+    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id ./scripts/TreeMerger.sh -t ${label} -f "${files_treemaker}" -n public/Output_root/TreeMaker
   fi
 fi
