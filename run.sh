@@ -37,7 +37,7 @@ while :; do
       ;;
     -d)
       if [ "$2" ]; then
-        datatag=$2
+        datafile=$2
         shift
       fi
       ;;
@@ -79,21 +79,21 @@ fi
 
 
 # Handle case without -d flag
-if [ -z "$datatag" ]; then
-  datatag="run15504_00" #JPARC cosmics MAGNET ON November 2023
-  # datatag="nd280_00016070_0004" #JPARC cosmics MAGNET ON November 2023
-  # datatag="run01407_09" #JPARC cosmics MAGNET OFF March 4
-  # datatag="run01397_18" #JPARC cosmics MAGNET ON March 4
-  # datatag="hatTop_cosmic_00000019_0004" # tHAT cosmics CERN 350V  27.5kV center (run with pbs_nd280 14.10)
-  # datatag="hatTop_cosmic_00000024_0002" # tHAT cosmics CERN G2200 27.5kV center
-  # datatag="hatTop_cosmic_00000030_0000" # tHAT cosmics CERN G2200 20.0kV center
-  # datatag="hatTop_cosmic_00000032_0002" # tHAT cosmics CERN G2200 27.5kV left
-  # datatag="hatTop_cosmic_00000033_0002" # tHAT cosmics CERN G2200 27.5kV right
-  # datatag="MC_mum_vert" #Cosmics 0.4 to 5GeV muons- 
+if [ -z "$e" ]; then
+  # datafile="run15504_00" #JPARC cosmics MAGNET ON November 2023
+  # datafile="nd280_00016070_0004" #JPARC cosmics MAGNET ON November 2023
+  # datafile="run01407_09" #JPARC cosmics MAGNET OFF March 4
+  # datafile="run01397_18" #JPARC cosmics MAGNET ON March 4
+  # datafile="hatTop_cosmic_00000019_0004" # tHAT cosmics CERN 350V  27.5kV center (run with pbs_nd280 14.10)
+  # datafile="hatTop_cosmic_00000024_0002" # tHAT cosmics CERN G2200 27.5kV center
+  # datafile="hatTop_cosmic_00000030_0000" # tHAT cosmics CERN G2200 20.0kV center
+  # datafile="hatTop_cosmic_00000032_0002" # tHAT cosmics CERN G2200 27.5kV left
+  # datafile="hatTop_cosmic_00000033_0002" # tHAT cosmics CERN G2200 27.5kV right
+  datafile="MC_mu-_600MeV_x50_y-60_z-285_phi0_theta0_N5000" #MC
 fi
 
-flags="-d ${datatag}"
-tag="${datatag}"
+flags="-d ${datafile}"
+tag="${datafile}"
 
 # Handle case with optional flag
 if [ "$start" -ne 0 ]; then
@@ -109,7 +109,7 @@ else
 fi
 
 if [ "$n" -ne 0 ]; then
-  flags_iter="-d ${datatag} -n ${n}"
+  flags_iter="-d ${datafile} -n ${n}"
 fi
 
 # Setting details
@@ -137,20 +137,20 @@ else
     sbatch -t 1:00:00 -n 1 --mem 3GB --account t2k -p ${machine} ./scripts/HATRecon.sh ${flags}
   else # several jobs
     for ((s = 0; s < N; s += n)); do
-      tag_iter="${datatag}_s${s}_n${n}${comment}"
+      tag_iter="${datafile}_s${s}_n${n}${comment}"
       flags_iter_here="${flags_iter} -s ${s} -t ${tag_iter}"
       echo "flags_iter_here: ${flags_iter_here}"
       job_hatrecon=$(sbatch -t 1:00:00 -n 1 --mem 3GB --account t2k -p ${machine} ./scripts/HATRecon.sh ${flags_iter_here})
       job_hatrecon_id="${job_hatrecon_id}:$(echo $job_hatrecon | awk '{print $NF}')"
-      files_treemaker="${files_treemaker} /sps/t2k/tdaret/public/Output_root/TreeMaker_${datatag}_s${s}_n${n}${comment}.root"
+      files_treemaker="${files_treemaker} /sps/t2k/tdaret/public/Output_root/TreeMaker_${datafile}_s${s}_n${n}${comment}.root"
     done
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/TreeMerger.sh -t ${tag} -f "${files_treemaker}" -n public/Output_root/TreeMaker
+    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/TreeMerger.sh -t ${tag} -f "${files_treemaker}" -n public/Output_root/TreeMaker_
   fi
 fi
 
 
   # Stupid step necessary to be able to run TreeMaker with files starting from an event > 0 because important information is written in the fake event 0
   # echo "Making HATRecon file with 1 event necessary to run TreeMaker"
-  # job_hat0=$(sbatch -t 0:02:00 -n 1 --mem 2GB --account t2k -p ${machine} ./scripts/HATRecon.sh -d ${datatag} -n 1 -t ${datatag}_n1)
+  # job_hat0=$(sbatch -t 0:02:00 -n 1 --mem 2GB --account t2k -p ${machine} ./scripts/HATRecon.sh -d ${datafile} -n 1 -t ${datafile}_n1)
   # job_hat0_id="$(echo $job_hat0 | awk '{print $NF}')"
     # job_hatrecon=$(sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterany:$job_hat0_id ./scripts/HATRecon.sh ${flags_iter})

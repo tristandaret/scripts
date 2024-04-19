@@ -173,8 +173,8 @@ while [ "x$1" != x ]; do
 /gps/source/add $SRC
 /gps/particle ${PARTICLE}
 /gps/ang/type iso
-/gps/ang/mintheta $((90 + ${THETA} - ${DTHETA})) deg
-/gps/ang/maxtheta $((90 + ${THETA} + ${DTHETA})) deg
+/gps/ang/mintheta $((90 - (${THETA} - ${DTHETA}))) deg
+/gps/ang/maxtheta $((90 - (${THETA} + ${DTHETA}))) deg
 /gps/ang/minphi $((${PHI} - ${DPHI})) deg
 /gps/ang/maxphi $((${PHI} + ${DPHI})) deg
 /gps/ang/rot1 0 0 -1

@@ -1,5 +1,5 @@
 #!/bin/bash
-#flags (mandatory): -d datatag and -t tag
+#flags (mandatory): -d datafile and -t tag
 #flags (optional):  -n total number of events ; -s starting point
 
 cd ~/hatRecon/`nd280-system`
@@ -8,7 +8,7 @@ cd ~/hatRecon/`nd280-system`
 start=0 # starting from event #
 nevent=0 # total number of events processed
 tag=""
-rm_flag = false
+rm_flag=false
 
 # Parse command-line arguments
 while :; do
@@ -27,7 +27,7 @@ while :; do
       ;;
     -d)
       if [ "$2" ]; then
-        datatag=$2
+        datafile=$2
         shift
       fi
       ;;
@@ -58,24 +58,24 @@ while :; do
 done
 
 # Check if -d and -t flags are provided
-if [ -z "$datatag" ] || [ -z "$tag" ]; then
-  echo "HATRecon.sh usage: $0 [-s starting event | -n number of events ] -d datatag | -t tag"
+if [ -z "$datafile" ] || [ -z "$tag" ]; then
+  echo "HATRecon.sh usage: $0 [-s starting event | -n number of events ] -d datafile | -t tag"
   exit 1
 fi
 
 # Define data file
-if [[ ${datatag} == *"hatTop_cosmic"* ]]; then
-  datafile="/sps/t2k/tHAT_CERN_Cosmics/${datatag}.daq.mid.gz"
-elif [[ ${datatag} == *"run"* ]]; then
-  datafile="/sps/t2k/giganti/jparc_dog/cosmics/${datatag}.mid.gz"
-elif [[ ${datatag} == *"MC_mum_vert"* ]]; then
-  datafile="/sps/t2k/uvirgine/Work/testSoft14.18/det_gun_mu-_400-5000MeV_BFieldMap_100000evt_g4mc.root"
+if [[ ${datafile} == *"hatTop_cosmic"* ]]; then
+  datafile="/sps/t2k/tHAT_CERN_Cosmics/${datafile}.daq.mid.gz"
+elif [[ ${datafile} == *"run"* ]]; then
+  datafile="/sps/t2k/giganti/jparc_dog/cosmics/${datafile}.mid.gz"
+elif [[ ${datafile} == *"MC"* ]]; then
+  datafile="$HOME/public/data/MC/${datafile}.root"
 else
-  echo "Unknown datatag: ${datatag}"
+  echo "Unknown data file: ${datafile}"
   exit 1
 fi
-# datafile="/sps/t2k/ND280upDataCosmics/magnetON/${datatag}.mid.gz"
-# datafile="/sps/t2k/ND280upDataCosmics/magnetOFF/${datatag}.mid.gz"
+# datafile="/sps/t2k/ND280upDataCosmics/magnetON/${datafile}.mid.gz"
+# datafile="/sps/t2k/ND280upDataCosmics/magnetOFF/${datafile}.mid.gz"
 
 echo "File used:        ${datafile}"
 
@@ -115,14 +115,13 @@ echo -e "\n---   TREEMAKER   ---" >> "${log}"
 ./bin/HATRECONTREEMAKER.exe -R -O outfile=${treemaker_output} ${hatrecon_output} &>> ${log}
 
 if [[ "$rm_flag" = true ]]; then
-  echo "in remove condition"
   rm ${hatrecon_output} ${log}
 fi
 
 
-# hatrecon_output_ref0="$HOME/public/Output_root/HATRecon_${datatag}_n1.root"
+# hatrecon_output_ref0="$HOME/public/Output_root/HATRecon_${datafile}_n1.root"
 # if [ "$nevent" -ne 1 ]; then
-#   if [[ ${datatag} == *"hatTop_cosmic"* ]]; then
+#   if [[ ${datafile} == *"hatTop_cosmic"* ]]; then
 #     hadd -a ${hatrecon_output} ${hatrecon_output_ref0}
 #   fi
 #   ./bin/HATRECONTREEMAKER.exe -R -O outfile=${treemaker_output} ${hatrecon_output} &> ${treemaker_output_log}

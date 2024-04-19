@@ -69,24 +69,22 @@ fi
 particle="mu-"
 energy="600"
 
-# Position
-#(Xmin, Xmax) = 
-#(Ymin, Ymax) =
-#(Zmin, Zmax) = (X, -110) cm
-# bHAT: (DX, DY, DZ) = (±102, ±41, ±93) cm
-# center of bHAT:       (X, Y, Z) = (0,   -75, -200) cm
+# Position (approximate values by scanning with the gun)
+#HAT center:           (  0, -75, -192.5) cm
+#HAT half lengths:     (±97, ±35, ± 82.5) cm
+#HAT inner dimensions: (194,  70,  165)   cm
 X=50
-Y=-30
-Z=-280
+Y=-60
+Z=-285
 DX=0
-DY=0
+DY=1
 DZ=0
 
 # Direction
-phi=-90
-dphi=0
+phi=0
+dphi=1
 theta=0
-dtheta=0
+dtheta=1
 label="MC_${particle}_${energy}MeV_x${X}_y${Y}_z${Z}_phi${phi}_theta${theta}"
 
 flags="-p $particle -e $energy -x $X -y $Y -z $Z --dx $DX --dy $DY --dz $DZ --phi $phi --dphi $dphi --theta $theta --dtheta $dtheta"
@@ -124,12 +122,12 @@ else
     for ((i=0; i<N/n; i++)); do
       label_job_here="${label_job}_i${i}"
       flags_job="${flags} -i ${i} -l ${label_job_here}"
-      job_mc=$(sbatch -t 1:00:00 -n 1 --mem 3GB --account t2k -p ${machine} ./scripts/gun_init.sh ${flags_job})
+      job_mc=$(sbatch -t 1:00:00 -n 1 --mem 4GB --account t2k -p ${machine} ./scripts/gun_init.sh ${flags_job})
       job_mc_id="${job_mc_id}:$(echo $job_mc | awk '{print $NF}')"
       files_data="${files_data} /sps/t2k/tdaret/public/Output_root/MC/2_DetResSim_${label_job_here}.root"
       files_treemaker="${files_treemaker} /sps/t2k/tdaret/public/Output_root/TreeMaker_${label_job_here}.root"
     done
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id ./scripts/TreeMerger.sh -t ${label} -f "${files_data}" -n public/data/MC/Data
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id ./scripts/TreeMerger.sh -t ${label} -f "${files_treemaker}" -n public/Output_root/TreeMaker
+    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id ./scripts/TreeMerger.sh -t ${label} -f "${files_data}" -n public/data/MC/
+    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id ./scripts/TreeMerger.sh -t ${label} -f "${files_treemaker}" -n public/Output_root/TreeMaker_
   fi
 fi
