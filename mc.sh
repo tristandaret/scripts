@@ -1,11 +1,12 @@
 #!/bin/bash
 rm -f $HOME/slurm-*.out
 rm -f $HOME/plots/*.pdf
+rm -f $HOME/public/Output_log/*.log
 
 # Default values of flags
 N=2000      # number of events
 n=0         # number of events per job
-tag=""
+tag="_cosmics"
 rm_flag=false
 make_flag=false
 machine="htc"
@@ -73,18 +74,18 @@ energy="600"
 #HAT center:           (  0, -75, -192.5) cm
 #HAT half lengths:     (±97, ±35, ± 82.5) cm
 #HAT inner dimensions: (194,  70,  165)   cm
-X=50
-Y=-60
-Z=-285
+X=-50
+Y=-40
+Z=-190
 DX=0
-DY=1
+DY=0
 DZ=0
 
 # Direction
-phi=0
-dphi=1
+phi=-90
+dphi=0
 theta=0
-dtheta=1
+dtheta=0
 label="MC_${particle}_${energy}MeV_x${X}_y${Y}_z${Z}_phi${phi}_theta${theta}"
 
 flags="-p $particle -e $energy -x $X -y $Y -z $Z --dx $DX --dy $DY --dz $DZ --phi $phi --dphi $dphi --theta $theta --dtheta $dtheta"

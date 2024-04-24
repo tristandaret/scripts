@@ -158,7 +158,7 @@ echo "--- STEP 1:  PARTICLE GUN  ---" > "${log}"
 DetResSim_output="$HOME/public/Output_root/MC/2_DetResSim_${label}.root"
 echo "DetResSim_output: ${DetResSim_output}"
 echo -e "\n--- STEP 2: DETRESPONSESIM ---" >> "${log}"
-DETRESPONSESIM.exe ${gun_output} -o ${DetResSim_output} -R &>> ${log}
+DETRESPONSESIM.exe -O hat-only ${gun_output} -o ${DetResSim_output} -R &>> ${log}
 
 # HATRecon
 HATRecon_output="$HOME/public/Output_root/MC/3_HATRecon_${label}.root"

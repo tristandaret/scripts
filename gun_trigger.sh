@@ -164,7 +164,7 @@ while [ "x$1" != x ]; do
     DTHETA=$1
     shift
 
-    echo "#>> '${PARTICLE}' @ '${KE}' MeV -> (phi='${PHI}±${DPHI}',theta='${THETA}±${DTHETA}')"
+    echo "#>> '${PARTICLE}' @ '${KE}' MeV -> (phi='${PHI}±${DPHI}'°,theta='${THETA}±${DTHETA}'°)"
 
     SRC=$(($SRC + 1))
 

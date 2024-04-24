@@ -115,7 +115,7 @@ echo -e "\n---   TREEMAKER   ---" >> "${log}"
 ./bin/HATRECONTREEMAKER.exe -R -O outfile=${treemaker_output} ${hatrecon_output} &>> ${log}
 
 if [[ "$rm_flag" = true ]]; then
-  rm ${hatrecon_output} ${log}
+  rm ${hatrecon_output}
 fi
 
 
