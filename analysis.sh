@@ -9,7 +9,7 @@ rm -f $HOME/public/Output_log/*.log
 start=0       # starting event
 N=0           # never of events analyzed (0: all)
 n=0           # number of events per job
-comment="_split"
+comment="_NoThetaCorr"
 rm_flag=false
 make_flag=false
 machine="htc"
@@ -128,20 +128,20 @@ fi
 if [ ${n} -eq 0 ]; then
   echo "STARTING: HATRecon for ${N} events in interactive shell"
   echo "flags: ${flags}"
-  ./scripts/HATRecon.sh ${flags}
+  ./scripts/reco.sh ${flags}
 
 # Parallelization
 else
   echo "STARTING: HATRecon for ${N} events with parallel jobs of ${n} events each"
   echo "flags: ${flags}"
   if [ $N -eq $n ]; then # single job
-    sbatch -t 1:00:00 -n 1 --mem 3GB --account t2k -p ${machine} ./scripts/HATRecon.sh ${flags}
+    sbatch -t 1:00:00 -n 1 --mem 3GB --account t2k -p ${machine} ./scripts/reco.sh ${flags}
   else # several jobs
     for ((s = 0; s < N; s += n)); do
       tag_iter="${datafile}_s${s}_n${n}${comment}"
       flags_iter_here="${flags_iter} -s ${s} -t ${tag_iter}"
       echo "flags_iter_here: ${flags_iter_here}"
-      job_hatrecon=$(sbatch -t 1:00:00 -n 1 --mem 3GB --account t2k -p ${machine} ./scripts/HATRecon.sh ${flags_iter_here})
+      job_hatrecon=$(sbatch -t 1:00:00 -n 1 --mem 3GB --account t2k -p ${machine} ./scripts/reco.sh ${flags_iter_here})
       job_hatrecon_id="${job_hatrecon_id}:$(echo $job_hatrecon | awk '{print $NF}')"
       files_treemaker="${files_treemaker} /sps/t2k/tdaret/public/Output_root/TreeMaker_${datafile}_s${s}_n${n}${comment}.root"
     done
@@ -152,6 +152,6 @@ fi
 
   # Stupid step necessary to be able to run TreeMaker with files starting from an event > 0 because important information is written in the fake event 0
   # echo "Making HATRecon file with 1 event necessary to run TreeMaker"
-  # job_hat0=$(sbatch -t 0:02:00 -n 1 --mem 2GB --account t2k -p ${machine} ./scripts/HATRecon.sh -d ${datafile} -n 1 -t ${datafile}_n1)
+  # job_hat0=$(sbatch -t 0:02:00 -n 1 --mem 2GB --account t2k -p ${machine} ./scripts/reco.sh -d ${datafile} -n 1 -t ${datafile}_n1)
   # job_hat0_id="$(echo $job_hat0 | awk '{print $NF}')"
-    # job_hatrecon=$(sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterany:$job_hat0_id ./scripts/HATRecon.sh ${flags_iter})
+    # job_hatrecon=$(sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterany:$job_hat0_id ./scripts/reco.sh ${flags_iter})

@@ -75,14 +75,14 @@ energy="600"
 #HAT half lengths:     (±97, ±35, ± 82.5) cm
 #HAT inner dimensions: (194,  70,  165)   cm
 X=-50
-Y=-40
-Z=-190
+Y=-60
+Z=-280
 DX=0
 DY=0
 DZ=0
 
 # Direction
-phi=-90
+phi=0
 dphi=0
 theta=0
 dtheta=0
