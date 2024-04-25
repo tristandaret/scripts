@@ -1,7 +1,6 @@
 #!/bin/bash
-rm -f $HOME/slurm-*.out
-rm -f $HOME/plots/*.pdf
-rm -f $HOME/public/Output_log/*.log
+
+./scripts/cleaning.sh
 
 # Default values of flags
 N=2000      # number of events
@@ -68,7 +67,7 @@ fi
 # flags for gun_init.sh
 # Gun type
 particle="mu-"
-energy="600"
+energy="1000"
 
 # Position (approximate values by scanning with the gun)
 #HAT center:           (  0, -75, -192.5) cm

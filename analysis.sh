@@ -2,9 +2,7 @@
 #flags (mandatory): -d datafile
 #flags (optional): -s starting at event number s ; -N number of events ; -n number of events per jobs
 
-rm -f $HOME/slurm-*.out
-rm -f $HOME/plots/*.pdf
-rm -f $HOME/public/Output_log/*.log
+./scripts/cleaning.sh
 
 start=0       # starting event
 N=0           # never of events analyzed (0: all)
