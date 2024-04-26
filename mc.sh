@@ -5,7 +5,7 @@
 # Default values of flags
 N=2000      # number of events
 n=0         # number of events per job
-tag="_cosmics"
+tag=""
 rm_flag=false
 make_flag=false
 machine="htc"
@@ -73,8 +73,8 @@ energy="1000"
 #HAT center:           (  0, -75, -192.5) cm
 #HAT half lengths:     (±97, ±35, ± 82.5) cm
 #HAT inner dimensions: (194,  70,  165)   cm
-X=-50
-Y=-60
+X=-90
+Y=-50
 Z=-280
 DX=0
 DY=0
@@ -83,7 +83,7 @@ DZ=0
 # Direction
 phi=0
 dphi=0
-theta=0
+theta=45
 dtheta=0
 label="MC_${particle}_${energy}MeV_x${X}_y${Y}_z${Z}_phi${phi}_theta${theta}"
 

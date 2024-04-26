@@ -7,7 +7,7 @@
 start=0       # starting event
 N=0           # never of events analyzed (0: all)
 n=0           # number of events per job
-comment="_NoThetaCorr"
+comment=""
 rm_flag=false
 make_flag=false
 machine="htc"
@@ -79,6 +79,8 @@ fi
 
 # Handle case without -d flag
 if [ -z "$datafile" ]; then
+  # datafile="R2021_07_02-11_26_27-000" #DESY21 electrons 4 GeV
+  datafile="R2022_09_07-21_38_55-000" #CERN2022 muons +1GeV full mockup
   # datafile="run15504_00" #JPARC cosmics MAGNET ON November 2023
   # datafile="nd280_00016070_0004" #JPARC cosmics MAGNET ON November 2023
   # datafile="run01407_09" #JPARC cosmics MAGNET OFF March 4
@@ -88,7 +90,7 @@ if [ -z "$datafile" ]; then
   # datafile="hatTop_cosmic_00000030_0000" # tHAT cosmics CERN G2200 20.0kV center
   # datafile="hatTop_cosmic_00000032_0002" # tHAT cosmics CERN G2200 27.5kV left
   # datafile="hatTop_cosmic_00000033_0002" # tHAT cosmics CERN G2200 27.5kV right
-  datafile="MC_mu-_600MeV_x-80_y-60_z-280_phi0_theta45_N400_beam" #MC
+  # datafile="MC_mu-_600MeV_x-80_y-40_z-280_phi0_theta45_N400" #MC
 fi
 
 flags="-d ${datafile}"

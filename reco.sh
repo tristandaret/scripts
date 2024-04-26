@@ -64,12 +64,17 @@ if [ -z "$datafile" ] || [ -z "$tag" ]; then
 fi
 
 # Define data file
-if [[ ${datafile} == *"hatTop_cosmic"* ]]; then
+if [[ ${datafile} == *"MC"* ]]; then
+  datafile="$HOME/public/data/MC/${datafile}.root"
+elif [[ ${datafile} == *"R2021"* ]]; then
+  datafile="$HOME/public/data/DESY21/${datafile}.root"
+elif [[ ${datafile} == *"R2022"* ]]; then
+  # datafile="$HOME/public/data/CERN22/${datafile}.root"
+  datafile="/sps/t2k/testbeamdata/CERN-2022/root/trawevents/${datafile}.root"
+elif [[ ${datafile} == *"hatTop_cosmic"* ]]; then
   datafile="/sps/t2k/tHAT_CERN_Cosmics/${datafile}.daq.mid.gz"
 elif [[ ${datafile} == *"run"* ]]; then
   datafile="/sps/t2k/giganti/jparc_dog/cosmics/${datafile}.mid.gz"
-elif [[ ${datafile} == *"MC"* ]]; then
-  datafile="$HOME/public/data/MC/${datafile}.root"
 else
   echo "Unknown data file: ${datafile}"
   exit 1
@@ -101,17 +106,24 @@ echo "Running:          HATRecon"
 echo "HATRecon flags:   ${flags}"
 echo "HATRecon output:  ${hatrecon_output}"
 echo "---    HATRECON    ---" > "${log}"
+
 if [[ ${tag} == *"MC"* ]]; then
   ./bin/HATRECON.exe ${datafile} -o ${hatrecon_output} ${flags} &>> ${log} # MC data
+elif [[ ${tag} == *"R2021"* || ${tag} == *"R2022"* ]]; then
+  geometry="/sps/t2k/wsaenz/My_files/detres_gun_nu_e_700MeV_g4mc_72800.root"
+  echo "Geometry:         ${geometry}"
+  echo "< hatRecon.TestBeamFile = ${datafile} >" > new_par.dat
+  ./bin/HATRECON.exe -o ${hatrecon_output} ${geometry} -O par_override=./new_par.dat ${flags} &>> ${log} #test beam data
 else
   geometry="/sps/t2k/uvirgine/Work/nd280_Software/anaCosmics20231002/geometry.root"
-  echo "Geometry:         ${geometry}"
+  echo "Geometry:           ${geometry}"
   ./bin/HATRECON.exe -G ${geometry} -m ${datafile} -o ${hatrecon_output} ${flags} &>> ${log} # real data
 fi
 
 echo "Running: TreeMaker"
 echo "TreeMaker output: ${treemaker_output}"
 echo -e "\n---   TREEMAKER   ---" >> "${log}"
+
 ./bin/HATRECONTREEMAKER.exe -R -O outfile=${treemaker_output} ${hatrecon_output} &>> ${log}
 
 if [[ "$rm_flag" = true ]]; then
