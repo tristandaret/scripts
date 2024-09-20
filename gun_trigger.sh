@@ -51,7 +51,7 @@ HALFX="1 cm"
 HALFY="1 cm"
 HALFZ="1 cm"
 COUNT=10
-BASELINE="baseline-2023"
+BASELINE="baseline-2024"
 
 # A variable to build the file name.
 NAME=""
@@ -125,12 +125,12 @@ while :; do
 done
 POSITION="${X} ${Y} ${Z} cm"
 
-echo "#   Generate '$COUNT' events"
-echo "#   Geometry '$BASELINE'"
-echo "#   Central Position '$POSITION'"
-echo "#   Half X '$HALFX'"
-echo "#   Half Y '$HALFY'"
-echo "#   Half Z '$HALFZ'"
+echo "#   Generate $COUNT events"
+echo "#   Geometry $BASELINE"
+echo "#   Central Position $POSITION"
+echo "#   Half X $HALFX"
+echo "#   Half Y $HALFY"
+echo "#   Half Z $HALFZ"
 
 # Make a temporary macro file in the local directory.
 MACRO=`TMPDIR="." mktemp -t nd280Geant4Sim.XXXXXXXXXX` || exit 1
@@ -164,7 +164,7 @@ while [ "x$1" != x ]; do
     DTHETA=$1
     shift
 
-    echo "#>> '${PARTICLE}' @ '${KE}' MeV -> (phi='${PHI}±${DPHI}'°,theta='${THETA}±${DTHETA}'°)"
+    echo "#>> ${PARTICLE} @ ${KE} MeV -> (phi=${PHI}±${DPHI}°,theta=${THETA}±${DTHETA}°)"
 
     SRC=$(($SRC + 1))
 
@@ -239,9 +239,9 @@ cat >> $MACRO <<EOF
 /run/beamOn ${COUNT}
 EOF
 
-echo "#   Output file: '${NAME}'"
+echo "#   Output file: ${NAME}"
 if [ -f "${NAME}" ]; then
-    echo "Must remove '${NAME}' by hand"
+    echo "Must remove ${NAME} by hand"
     rm $MACRO
     exit 1
 fi

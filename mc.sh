@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./scripts/cleaning.sh
+$HOME/scripts/cleaning.sh
 
 # Default values of flags
 N=2000      # number of events
@@ -70,12 +70,12 @@ particle="mu-"
 energy="1000"
 
 # Position (approximate values by scanning with the gun)
-#HAT center:           (  0, -75, -192.5) cm
+#bHAT center:          (  0, -75, -192.5) cm
 #HAT half lengths:     (±97, ±35, ± 82.5) cm
 #HAT inner dimensions: (194,  70,  165)   cm
-X=-90
-Y=-50
-Z=-280
+X=50
+Y=-75
+Z=-270
 DX=0
 DY=0
 DZ=0
@@ -83,7 +83,7 @@ DZ=0
 # Direction
 phi=0
 dphi=0
-theta=45
+theta=0
 dtheta=0
 label="MC_${particle}_${energy}MeV_x${X}_y${Y}_z${Z}_phi${phi}_theta${theta}"
 
@@ -94,11 +94,11 @@ fi
 # Batch or non-batch mode for number of events
 if [ $n -ne 0 ]; then
   flags="${flags} -N $n"
-  label_job="${label}_N${n}${tag}"
+  label_job="${label}_N${n}_${tag}"
 else
   flags="${flags} -N $N"
 fi
-label="${label}_N${N}${tag}"
+label="${label}_N${N}_${tag}"
 # Remove intermediate files
 if [ "$rm_flag" = true ]; then
   flags="${flags} --rm"
@@ -111,23 +111,23 @@ fi
 if [ $n -eq 0 ]; then
   echo "STARTING: Particle guns of ${N} events in interactive shell"
   flags="${flags} -l ${label}"
-  ./scripts/gun_init.sh ${flags}
+  $HOME/scripts/gun_init.sh ${flags}
 
 # Jobs
 else
   echo "STARTING: Particle guns of ${N} events with jobs of ${n} events each"
   if [ $N -eq $n ]; then
-    sbatch -t 1:00:00 -n 1 --mem 3GB --account t2k -p ${machine} ./scripts/gun_init.sh ${flags} -l ${label}
+    sbatch -t 1:00:00 -n 1 --mem 3GB --account t2k -p ${machine} $HOME/scripts/gun_init.sh ${flags} -l ${label}
   else
     for ((i=0; i<N/n; i++)); do
       label_job_here="${label_job}_i${i}"
       flags_job="${flags} -i ${i} -l ${label_job_here}"
-      job_mc=$(sbatch -t 1:00:00 -n 1 --mem 4GB --account t2k -p ${machine} ./scripts/gun_init.sh ${flags_job})
+      job_mc=$(sbatch -t 1:00:00 -n 1 --mem 4GB --account t2k -p ${machine} $HOME/scripts/gun_init.sh ${flags_job})
       job_mc_id="${job_mc_id}:$(echo $job_mc | awk '{print $NF}')"
-      files_data="${files_data} /sps/t2k/tdaret/public/Output_root/MC/2_DetResSim_${label_job_here}.root"
-      files_treemaker="${files_treemaker} /sps/t2k/tdaret/public/Output_root/TreeMaker_${label_job_here}.root"
+      files_data="${files_data} $HOME/public/Output_root/MC/2_DetResSim_${label_job_here}.root"
+      files_treemaker="${files_treemaker} $HOME/public/Output_root/TreeMaker_${label_job_here}.root"
     done
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id ./scripts/TreeMerger.sh -t ${label} -f "${files_data}" -n public/data/MC/
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id ./scripts/TreeMerger.sh -t ${label} -f "${files_treemaker}" -n public/Output_root/TreeMaker_
+    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/TreeMerger.sh -t ${label} -f "${files_data}" -n public/data/MC/
+    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/TreeMerger.sh -t ${label} -f "${files_treemaker}" -n public/Output_root/TreeMaker_
   fi
 fi

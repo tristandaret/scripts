@@ -152,13 +152,13 @@ echo "logs:             ${log}"
 echo "gun_flags:        ${gun_flags}"
 echo "gun_output:       ${gun_output}"
 echo "--- STEP 1:  PARTICLE GUN  ---" > "${log}"
-~/scripts/gun_trigger.sh ${gun_flags} &>> "${log}"
+$HOME/scripts/gun_trigger.sh ${gun_flags} &>> "${log}"
 
 # DetResponseSim
 DetResSim_output="$HOME/public/Output_root/MC/2_DetResSim_${label}.root"
 echo "DetResSim_output: ${DetResSim_output}"
 echo -e "\n--- STEP 2: DETRESPONSESIM ---" >> "${log}"
-DETRESPONSESIM.exe ${gun_output} -o ${DetResSim_output} -R &>> ${log}
+DETRESPONSESIM.exe ${gun_output} -o ${DetResSim_output} -R -O hat-only &>> ${log}
 
 # HATRecon
 HATRecon_output="$HOME/public/Output_root/MC/3_HATRecon_${label}.root"

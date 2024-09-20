@@ -5,7 +5,7 @@
 ./scripts/cleaning.sh
 
 start=0       # starting event
-N=0           # never of events analyzed (0: all)
+N=0           # number of events analyzed (0: all)
 n=0           # number of events per job
 comment=""
 rm_flag=false
@@ -70,9 +70,10 @@ while :; do
 done
 
 if [ "$make_flag" = true ]; then
+  source $HOME/hatRecon/bin/setup.sh
   cd $HOME/hatRecon/`nd280-system`
   cmake ../cmake/
-  make -j40
+  make -j16
   cd ../..
 fi
 
@@ -80,7 +81,7 @@ fi
 # Handle case without -d flag
 if [ -z "$datafile" ]; then
   # datafile="R2021_07_02-11_26_27-000" #DESY21 electrons 4 GeV
-  datafile="R2022_09_07-21_38_55-000" #CERN2022 muons +1GeV full mockup
+  # datafile="R2022_09_07-21_38_55-000" #CERN2022 muons +1GeV full mockup
   # datafile="run15504_00" #JPARC cosmics MAGNET ON November 2023
   # datafile="nd280_00016070_0004" #JPARC cosmics MAGNET ON November 2023
   # datafile="run01407_09" #JPARC cosmics MAGNET OFF March 4
@@ -90,7 +91,11 @@ if [ -z "$datafile" ]; then
   # datafile="hatTop_cosmic_00000030_0000" # tHAT cosmics CERN G2200 20.0kV center
   # datafile="hatTop_cosmic_00000032_0002" # tHAT cosmics CERN G2200 27.5kV left
   # datafile="hatTop_cosmic_00000033_0002" # tHAT cosmics CERN G2200 27.5kV right
-  # datafile="MC_mu-_600MeV_x-80_y-40_z-280_phi0_theta45_N400" #MC
+  # datafile="2_DetResSim_MC_mu-_1000MeV_x90_y-90_z-270_phi30_theta-45_N25" #MC
+  # datafile="hat_00000885_0000" # cosmics at JPARC for gain equalization (magnet opened)
+  # datafile="hat_00000907_0000" # cosmics at JPARC for gain equalization (magnet closed but off)
+  # datafile="hattree_fixbug_1148" #data with B field
+  datafile="MC_mu-_1000MeV_x50_y-75_z-270_phi0_theta0_N20_test" # test
 fi
 
 flags="-d ${datafile}"
@@ -126,7 +131,11 @@ fi
 
 # Run in interactive shell
 if [ ${n} -eq 0 ]; then
-  echo "STARTING: HATRecon for ${N} events in interactive shell"
+  if [ "$N" -ne 0 ]; then
+    echo "STARTING: HATRecon for ${N} events in interactive shell"
+  else
+    echo "STARTING: HATRecon for all events in interactive shell"
+  fi
   echo "flags: ${flags}"
   ./scripts/reco.sh ${flags}
 
@@ -143,15 +152,11 @@ else
       echo "flags_iter_here: ${flags_iter_here}"
       job_hatrecon=$(sbatch -t 1:00:00 -n 1 --mem 3GB --account t2k -p ${machine} ./scripts/reco.sh ${flags_iter_here})
       job_hatrecon_id="${job_hatrecon_id}:$(echo $job_hatrecon | awk '{print $NF}')"
+      files_hatrecon="${files_hatrecon} /sps/t2k/tdaret/public/Output_root/HATRecon_${datafile}_s${s}_n${n}${comment}.root"
       files_treemaker="${files_treemaker} /sps/t2k/tdaret/public/Output_root/TreeMaker_${datafile}_s${s}_n${n}${comment}.root"
     done
+    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/TreeMerger.sh -t ${tag} -f "${files_hatrecon}" -n public/Output_root/hatRecon_
     sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/TreeMerger.sh -t ${tag} -f "${files_treemaker}" -n public/Output_root/TreeMaker_
+    # sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} ./scripts/TreeMerger.sh -t ${tag} -f "${files_treemaker}" -n public/Output_root/TreeMaker_
   fi
 fi
-
-
-  # Stupid step necessary to be able to run TreeMaker with files starting from an event > 0 because important information is written in the fake event 0
-  # echo "Making HATRecon file with 1 event necessary to run TreeMaker"
-  # job_hat0=$(sbatch -t 0:02:00 -n 1 --mem 2GB --account t2k -p ${machine} ./scripts/reco.sh -d ${datafile} -n 1 -t ${datafile}_n1)
-  # job_hat0_id="$(echo $job_hat0 | awk '{print $NF}')"
-    # job_hatrecon=$(sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterany:$job_hat0_id ./scripts/reco.sh ${flags_iter})
