@@ -12,8 +12,7 @@
 # The last 6 positionnal arguments can be repeated to generate several particles
 #
 #     baseline -- The name of the macro describing the geometry (typically
-#           "baseline-2023" for the upgrade and "baseline" for everything
-#           else).
+#           "baseline-2024" for the upgrade).
 #
 #     count -- The number of events to generate.
 #

@@ -147,7 +147,7 @@ log="$HOME/public/Output_log/logs_${label}.log"
 
 # Particle gun
 gun_output="$HOME/public/Output_root/MC/1_gun_${label}.root"
-gun_flags="-b baseline-2022 -N ${N} -x ${X} -y ${Y} -z ${Z} --dx ${DX} --dy ${DY} --dz ${DZ} -n ${gun_output} -- ${particle} ${energy} ${phi} ${dphi} ${theta} ${dtheta}"
+gun_flags="-b baseline-2024 -N ${N} -x ${X} -y ${Y} -z ${Z} --dx ${DX} --dy ${DY} --dz ${DZ} -n ${gun_output} -- ${particle} ${energy} ${phi} ${dphi} ${theta} ${dtheta}"
 echo "logs:             ${log}"
 echo "gun_flags:        ${gun_flags}"
 echo "gun_output:       ${gun_output}"

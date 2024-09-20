@@ -3,7 +3,7 @@
 $HOME/scripts/cleaning.sh
 
 # Default values of flags
-N=2000      # number of events
+N=500       # number of events
 n=0         # number of events per job
 tag=""
 rm_flag=false
@@ -67,21 +67,21 @@ fi
 # flags for gun_init.sh
 # Gun type
 particle="mu-"
-energy="1000"
+energy="600"
 
 # Position (approximate values by scanning with the gun)
 #bHAT center:          (  0, -75, -192.5) cm
 #HAT half lengths:     (±97, ±35, ± 82.5) cm
 #HAT inner dimensions: (194,  70,  165)   cm
-X=50
-Y=-75
-Z=-270
+X=-50
+Y=-110
+Z=-220
 DX=0
 DY=0
-DZ=0
+DZ=50
 
 # Direction
-phi=0
+phi=45
 dphi=0
 theta=0
 dtheta=0
@@ -94,11 +94,15 @@ fi
 # Batch or non-batch mode for number of events
 if [ $n -ne 0 ]; then
   flags="${flags} -N $n"
-  label_job="${label}_N${n}_${tag}"
+  label_job="${label}_N${n}"
 else
   flags="${flags} -N $N"
 fi
-label="${label}_N${N}_${tag}"
+label="${label}_N${N}"
+# Add tag if any
+if [ "$tag" != "" ]; then
+  label="${label}_${tag}"
+fi
 # Remove intermediate files
 if [ "$rm_flag" = true ]; then
   flags="${flags} --rm"
