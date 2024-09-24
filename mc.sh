@@ -67,27 +67,27 @@ fi
 # flags for gun_init.sh
 # Gun type
 particle="mu-"
-energy="600"
+kinetic="600"
 
 # Position (approximate values by scanning with the gun)
 #bHAT center:          (  0, -75, -192.5) cm
 #HAT half lengths:     (±97, ±35, ± 82.5) cm
 #HAT inner dimensions: (194,  70,  165)   cm
 X=-50
-Y=-110
-Z=-220
+Y=-97
+Z=-180
 DX=0
 DY=0
-DZ=50
+DZ=0
 
 # Direction
-phi=45
+phi=0
 dphi=0
 theta=0
 dtheta=0
-label="MC_${particle}_${energy}MeV_x${X}_y${Y}_z${Z}_phi${phi}_theta${theta}"
+label="MC_${particle}_${kinetic}MeV_x${X}_y${Y}_z${Z}_phi${phi}_theta${theta}"
 
-flags="-p $particle -e $energy -x $X -y $Y -z $Z --dx $DX --dy $DY --dz $DZ --phi $phi --dphi $dphi --theta $theta --dtheta $dtheta"
+flags="-p $particle -e $kinetic -x $X -y $Y -z $Z --dx $DX --dy $DY --dz $DZ --phi $phi --dphi $dphi --theta $theta --dtheta $dtheta"
 if [ "$tag" != "" ]; then
   flags="${flags} -t $tag"
 fi

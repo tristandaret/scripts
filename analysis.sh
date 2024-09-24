@@ -7,7 +7,7 @@
 start=0       # starting event
 N=0           # number of events analyzed (0: all)
 n=0           # number of events per job
-comment=""
+comment="_noGRC"
 rm_flag=false
 make_flag=false
 machine="htc"
@@ -95,7 +95,7 @@ if [ -z "$datafile" ]; then
   # datafile="hat_00000885_0000" # cosmics at JPARC for gain equalization (magnet opened)
   # datafile="hat_00000907_0000" # cosmics at JPARC for gain equalization (magnet closed but off)
   # datafile="hattree_fixbug_1148" #data with B field
-  datafile="MC_mu-_1000MeV_x50_y-75_z-270_phi0_theta0_N20_test" # test
+  datafile="MC_mu-_600MeV_x-50_y-40_z-230_phi-80_theta0_N5000"
 fi
 
 flags="-d ${datafile}"
