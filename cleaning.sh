@@ -5,6 +5,7 @@ res=false
 hat=false
 tree=false
 all=false
+log=false
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -13,15 +14,19 @@ while [[ "$#" -gt 0 ]]; do
         --hat) hat=true ;;
         --tree) tree=true ;;
         --all) all=true ;;
+        --log) log=true ;;
     esac
     shift
 done
 
 rm -f $HOME/slurm-*.out
 rm -f $HOME/plots/*.pdf
-rm -f $HOME/public/Output_log/*.log
 rm -f $HOME/hatRecon/${HATRECONCONFIG}/nd280Geant4Sim.*
 rm -f $HOME/hatRecon/${HATRECONCONFIG}/core*
+
+if [ "$log" = true ]; then
+    rm -f $HOME/public/Output_log/*.log
+fi
 
 if [ "$gun" = true ] || [ "$all" = true ]; then
     rm -f $HOME/public/Output_root/MC/1_gun_*.root

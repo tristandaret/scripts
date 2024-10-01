@@ -1,7 +1,5 @@
 #!/bin/bash
 
-$HOME/scripts/cleaning.sh
-
 # Default values of flags
 N=500       # number of events
 n=0         # number of events per job
@@ -9,6 +7,29 @@ tag=""
 rm_flag=false
 make_flag=false
 machine="htc"
+cleaning=false
+
+# flags for gun_init.sh
+# Gun type
+particle="mu-"
+kinetic="600"
+
+# Position (approximate values by scanning with the gun)
+#bHAT center:          (  0, -75, -192.5) cm
+#HAT half lengths:     (±97, ±35, ± 82.5) cm
+#HAT inner dimensions: (194,  70,  165)   cm
+X=0
+Y=-50
+Z=-275
+DX=0
+DY=0
+DZ=0
+
+# Direction
+phi=0
+dphi=0
+theta=0
+dtheta=0
 
 # Parse command-line arguments
 while :; do
@@ -30,6 +51,15 @@ while :; do
         tag=$2
         shift
       fi
+      ;;
+    -X)
+      if [ "$2" ]; then
+        X=$2
+        shift
+      fi
+      ;;
+    --clean)
+      cleaning=true
       ;;
     --machine)
       if [ "$2" ]; then
@@ -56,35 +86,14 @@ while :; do
   shift
 done
 
-if [ "$make_flag" = true ]; then
-  cd $HOME/hatRecon/`nd280-system`
-  cmake ../cmake/
-  make -j40
-  cd ../..
+if [ "$cleaning" = true ]; then
+  $HOME/scripts/cleaning.sh
 fi
 
+if [ "$make_flag" = true ]; then
+  make_hatRecon
+fi
 
-# flags for gun_init.sh
-# Gun type
-particle="mu-"
-kinetic="600"
-
-# Position (approximate values by scanning with the gun)
-#bHAT center:          (  0, -75, -192.5) cm
-#HAT half lengths:     (±97, ±35, ± 82.5) cm
-#HAT inner dimensions: (194,  70,  165)   cm
-X=-50
-Y=-97
-Z=-180
-DX=0
-DY=0
-DZ=0
-
-# Direction
-phi=0
-dphi=0
-theta=0
-dtheta=0
 label="MC_${particle}_${kinetic}MeV_x${X}_y${Y}_z${Z}_phi${phi}_theta${theta}"
 
 flags="-p $particle -e $kinetic -x $X -y $Y -z $Z --dx $DX --dy $DY --dz $DZ --phi $phi --dphi $dphi --theta $theta --dtheta $dtheta"

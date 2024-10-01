@@ -2,15 +2,14 @@
 #flags (mandatory): -d datafile
 #flags (optional): -s starting at event number s ; -N number of events ; -n number of events per jobs
 
-./scripts/cleaning.sh
-
 start=0       # starting event
 N=0           # number of events analyzed (0: all)
 n=0           # number of events per job
-comment="_noGRC"
+comment=""
 rm_flag=false
 make_flag=false
 machine="htc"
+cleaning=false
 
 
 # Parse command-line arguments
@@ -39,6 +38,15 @@ while :; do
         datafile=$2
         shift
       fi
+      ;;
+    --comment)
+      if [ "$2" ]; then
+        comment=$2
+        shift
+      fi
+      ;;
+    --clean)
+      cleaning=true
       ;;
     --machine)
       if [ "$2" ]; then
@@ -69,12 +77,12 @@ while :; do
   shift
 done
 
+if [ "$cleaning" = true ]; then
+  $HOME/scripts/cleaning.sh
+fi
+
 if [ "$make_flag" = true ]; then
-  source $HOME/hatRecon/bin/setup.sh
-  cd $HOME/hatRecon/`nd280-system`
-  cmake ../cmake/
-  make -j16
-  cd ../..
+  make_hatRecon
 fi
 
 
@@ -95,7 +103,7 @@ if [ -z "$datafile" ]; then
   # datafile="hat_00000885_0000" # cosmics at JPARC for gain equalization (magnet opened)
   # datafile="hat_00000907_0000" # cosmics at JPARC for gain equalization (magnet closed but off)
   # datafile="hattree_fixbug_1148" #data with B field
-  datafile="MC_mu-_600MeV_x-50_y-40_z-230_phi-80_theta0_N5000"
+  datafile="MC_mu-_600MeV_x-98_y-90_z-250_phi0_theta0_N2000"
 fi
 
 flags="-d ${datafile}"
@@ -155,8 +163,7 @@ else
       files_hatrecon="${files_hatrecon} /sps/t2k/tdaret/public/Output_root/HATRecon_${datafile}_s${s}_n${n}${comment}.root"
       files_treemaker="${files_treemaker} /sps/t2k/tdaret/public/Output_root/TreeMaker_${datafile}_s${s}_n${n}${comment}.root"
     done
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/TreeMerger.sh -t ${tag} -f "${files_hatrecon}" -n public/Output_root/hatRecon_
+    # sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/TreeMerger.sh -t ${tag} -f "${files_hatrecon}" -n public/Output_root/hatRecon_
     sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/TreeMerger.sh -t ${tag} -f "${files_treemaker}" -n public/Output_root/TreeMaker_
-    # sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} ./scripts/TreeMerger.sh -t ${tag} -f "${files_treemaker}" -n public/Output_root/TreeMaker_
   fi
 fi

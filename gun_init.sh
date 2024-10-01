@@ -3,16 +3,16 @@ cd ~/hatRecon/`nd280-system`
 
 ### Default configuration: focused horizontal beam of 600 MeV muonsg
 # Gun type
-N=10
+N=100
 particle="mu-"
 energy="600"
 # Position
-X=50
+X=-50
 Y=-75
-Z=-300
-DX=1
-DY=1
-DZ=1
+Z=-375
+DX=0
+DY=0
+DZ=0
 # Direction
 phi=0
 dphi=0
