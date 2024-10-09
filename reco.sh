@@ -83,6 +83,7 @@ fi
 # datafile="/sps/t2k/ND280upDataCosmics/magnetOFF/${datafile}.mid.gz"
 # datafile="$HOME/public/data/${datafile}.daq.mid.gz"
 # datafile="/sps/t2k/Jparc/May_2024/${datafile}.daq.mid.gz"
+# datafile="$HOME/public/data/MC/${datafile}.root"
 datafile="$HOME/public/data/MC/${datafile}.root"
   # datafile="/sps/t2k/Jparc/May_2024/dog1/hatTree_RHEL/${datafile}.root"
 

@@ -1,11 +1,12 @@
 #!/bin/bash
+source ~/.bashrc
 #flags (mandatory): -d datafile
 #flags (optional): -s starting at event number s ; -N number of events ; -n number of events per jobs
 
 start=0       # starting event
 N=0           # number of events analyzed (0: all)
 n=0           # number of events per job
-comment=""
+comment="_new"
 rm_flag=false
 make_flag=false
 machine="htc"
@@ -82,7 +83,9 @@ if [ "$cleaning" = true ]; then
 fi
 
 if [ "$make_flag" = true ]; then
-  make_hatRecon
+  (cd $HOME/hatRecon/`nd280-system`
+  cmake ../cmake/
+  make -j16)
 fi
 
 
@@ -103,7 +106,8 @@ if [ -z "$datafile" ]; then
   # datafile="hat_00000885_0000" # cosmics at JPARC for gain equalization (magnet opened)
   # datafile="hat_00000907_0000" # cosmics at JPARC for gain equalization (magnet closed but off)
   # datafile="hattree_fixbug_1148" #data with B field
-  datafile="MC_mu-_600MeV_x-98_y-90_z-250_phi0_theta0_N2000"
+  # datafile="2_DetResSim_MC_mu-_600MeV_x-50_y-75_z-190_phi0_theta0_N15"
+  datafile="MC_mu-_600MeV_x-50_y-50_z-240_phi-60_theta0_N5000"
 fi
 
 flags="-d ${datafile}"
