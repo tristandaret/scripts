@@ -64,29 +64,9 @@ if [ -z "$datafile" ] || [ -z "$tag" ]; then
 fi
 
 # # Define data file
-# if [[ ${datafile} == *"MC"* ]]; then
-#   datafile="$HOME/public/data/MC/${datafile}.root"
-# elif [[ ${datafile} == *"R2021"* ]]; then
-#   datafile="$HOME/public/data/DESY21/${datafile}.root"
-# elif [[ ${datafile} == *"R2022"* ]]; then
-#   # datafile="$HOME/public/data/CERN22/${datafile}.root"
-#   datafile="/sps/t2k/testbeamdata/CERN-2022/root/trawevents/${datafile}.root"
-# elif [[ ${datafile} == *"hatTop_cosmic"* ]]; then
-#   datafile="/sps/t2k/tHAT_CERN_Cosmics/${datafile}.daq.mid.gz"
-# elif [[ ${datafile} == *"run"* ]]; then
-#   datafile="/sps/t2k/giganti/jparc_dog/cosmics/${datafile}.mid.gz"
-# else
-#   echo "Unknown data file: ${datafile}"
-#   exit 1
-# fi
-# datafile="/sps/t2k/ND280upDataCosmics/magnetON/${datafile}.mid.gz"
-# datafile="/sps/t2k/ND280upDataCosmics/magnetOFF/${datafile}.mid.gz"
-# datafile="$HOME/public/data/${datafile}.daq.mid.gz"
-# datafile="/sps/t2k/Jparc/May_2024/${datafile}.daq.mid.gz"
-# datafile="$HOME/public/data/MC/${datafile}.root"
 datafile="$HOME/public/data/MC/${datafile}.root"
-  # datafile="/sps/t2k/Jparc/May_2024/dog1/hatTree_RHEL/${datafile}.root"
-
+# datafile="$HOME/public/data/dog1/${datafile}.daq.mid.gz"
+# datafile="$HOME/public/Output_root/MC/${datafile}.root"
 echo "File used:        ${datafile}"
 
 # Output file names
@@ -112,17 +92,17 @@ echo "HATRecon flags:   ${flags}"
 echo "HATRecon output:  ${hatrecon_output}"
 echo "---    HATRECON    ---" > "${log}"
 
-if [[ ${tag} == *"MC"* ]]; then
-  ./bin/HATRECON.exe ${datafile} -o ${hatrecon_output} ${flags} &>> ${log} # MC data
-elif [[ ${tag} == *"R2021"* || ${tag} == *"R2022"* ]]; then
+if [[ ${tag} == *"MC"* ]]; then # MC data
+  ./bin/HATRECON.exe ${datafile} -o ${hatrecon_output} ${flags} &>> ${log}
+elif [[ ${tag} == *"R2021"* || ${tag} == *"R2022"* ]]; then #test beam data
   geometry="/sps/t2k/wsaenz/My_files/detres_gun_nu_e_700MeV_g4mc_72800.root"
   echo "Geometry:       ${geometry}"
   echo "< hatRecon.TestBeamFile = ${datafile} >" > new_par.dat
-  ./bin/HATRECON.exe -o ${hatrecon_output} ${geometry} -O par_override=./new_par.dat ${flags} &>> ${log} #test beam data
-else
+  ./bin/HATRECON.exe -o ${hatrecon_output} ${geometry} -O par_override=./new_par.dat ${flags} &>> ${log}
+else # real data
   geometry="/sps/t2k/tdaret/public/data/geom_bHAT_50k.root"
   echo "Geometry:         ${geometry}"
-  ./bin/HATRECON.exe -G ${geometry} -m ${datafile} -o ${hatrecon_output} ${flags} &>> ${log} # real data
+  ./bin/HATRECON.exe -G ${geometry} -m ${datafile} -o ${hatrecon_output} ${flags} &>> ${log}
 fi
 
 echo "Running: TreeMaker"

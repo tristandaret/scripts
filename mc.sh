@@ -18,16 +18,16 @@ kinetic="600"
 #bHAT center:          (  0, -75, -192.5) cm
 #HAT half lengths:     (±97, ±35, ± 82.5) cm
 #HAT inner dimensions: (194,  70,  165)   cm
-X=-50
-Y=-75
-Z=-190
-DX=30
-DY=30
-DZ=30
+X=28
+Y=-40
+Z=-200
+DX=0
+DY=0
+DZ=0
 
 # Direction
-phi=0
-dphi=90
+phi=-90
+dphi=0
 theta=0
 dtheta=0
 

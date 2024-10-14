@@ -6,7 +6,7 @@ source ~/.bashrc
 start=0       # starting event
 N=0           # number of events analyzed (0: all)
 n=0           # number of events per job
-comment="_new"
+comment=""
 rm_flag=false
 make_flag=false
 machine="htc"
@@ -102,12 +102,12 @@ if [ -z "$datafile" ]; then
   # datafile="hatTop_cosmic_00000030_0000" # tHAT cosmics CERN G2200 20.0kV center
   # datafile="hatTop_cosmic_00000032_0002" # tHAT cosmics CERN G2200 27.5kV left
   # datafile="hatTop_cosmic_00000033_0002" # tHAT cosmics CERN G2200 27.5kV right
-  # datafile="2_DetResSim_MC_mu-_1000MeV_x90_y-90_z-270_phi30_theta-45_N25" #MC
   # datafile="hat_00000885_0000" # cosmics at JPARC for gain equalization (magnet opened)
   # datafile="hat_00000907_0000" # cosmics at JPARC for gain equalization (magnet closed but off)
   # datafile="hattree_fixbug_1148" #data with B field
-  # datafile="2_DetResSim_MC_mu-_600MeV_x-50_y-75_z-190_phi0_theta0_N15"
-  datafile="MC_mu-_600MeV_x-50_y-50_z-240_phi-60_theta0_N5000"
+  # datafile="MC_mu-_600MeV_x-50_y-97_z-230_phi-10_theta0_N5000"
+  # datafile="2_DetResSim_MC_mu-_600MeV_x-50_y-75_z-190_phi0_theta0_N20"
+  datafile="dog1_00000920_0000"
 fi
 
 flags="-d ${datafile}"
@@ -148,7 +148,7 @@ if [ ${n} -eq 0 ]; then
   else
     echo "STARTING: HATRecon for all events in interactive shell"
   fi
-  echo "flags: ${flags}"
+  echo "flags:            ${flags}"
   ./scripts/reco.sh ${flags}
 
 # Parallelization
