@@ -7,7 +7,7 @@
 # (only one vertex per event).  With one particle, this is basically just a
 # complicated script to make a simple particle gun.
 #
-# gun_trigger.sh <options> [baseline] [count] \
+# particle_gun.sh <options> [baseline] [count] \
 #                       [particle] [energy] [dphi] [theta] [dtheta] \ 
 # The last 6 positionnal arguments can be repeated to generate several particles
 #

@@ -5,7 +5,7 @@ res=false
 hat=false
 tree=false
 all=false
-log=false
+log=true
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -14,7 +14,7 @@ while [[ "$#" -gt 0 ]]; do
         --hat) hat=true ;;
         --tree) tree=true ;;
         --all) all=true ;;
-        --log) log=true ;;
+        --nolog) log=false ;;
     esac
     shift
 done
@@ -29,17 +29,17 @@ if [ "$log" = true ]; then
 fi
 
 if [ "$gun" = true ] || [ "$all" = true ]; then
-    rm -f $HOME/public/Output_root/MC/1_gun_*.root
+    rm -f $HOME/public/Output_root/*/1_gun_*.root
 fi
 
 if [ "$res" = true ] || [ "$all" = true ]; then
-    rm -f $HOME/public/Output_root/MC/2_DetResSim_*.root
+    rm -f $HOME/public/Output_root/*/2_DetResSim_*.root
 fi
 
 if [ "$hat" = true ] || [ "$all" = true ]; then
-    rm -f $HOME/public/Output_root/MC/3_HATRecon_*.root
+    rm -f $HOME/public/Output_root/*/3_HATRecon_*.root
 fi
 
 if [ "$tree" = true ] || [ "$all" = true ]; then
-    rm -f $HOME/public/Output_root/MC/*TreeMaker_*.root
+    rm -f $HOME/public/Output_root/*/*TreeMaker_*.root
 fi

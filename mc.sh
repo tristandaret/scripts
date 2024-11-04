@@ -1,146 +1,177 @@
 #!/bin/bash
+cd ~/hatRecon/`nd280-system`
 
-# Default values of flags
-N=500       # number of events
-n=0         # number of events per job
-tag=""
-rm_flag=false
-make_flag=false
-machine="htc"
-cleaning=false
-
-# flags for gun_init.sh
+### Default configuration: focused horizontal beam of 600 MeV muonsg
 # Gun type
+N=100
 particle="mu-"
-kinetic="600"
-
-# Position (approximate values by scanning with the gun)
-#bHAT center:          (  0, -75, -192.5) cm
-#HAT half lengths:     (±97, ±35, ± 82.5) cm
-#HAT inner dimensions: (194,  70,  165)   cm
-X=28
-Y=-40
-Z=-200
+energy="600"
+# Position
+X=-50
+Y=-75
+Z=-375
 DX=0
 DY=0
 DZ=0
-
 # Direction
-phi=-90
+phi=0
 dphi=0
 theta=0
 dtheta=0
 
-# Parse command-line arguments
+# Parallelization 
+index=-999
+
+# Tags
+tag=""
+label=""
+rm_flag=false
+
+
 while :; do
-  case $1 in
-    -N)
-      if [ "$2" ]; then
-        N=$2
-        shift
-      fi
-      ;;
-    -n)
-      if [ "$2" ]; then
-        n=$2
-        shift
-      fi
-      ;;
-    -t)
-      if [ "$2" ]; then
-        tag=$2
-        shift
-      fi
-      ;;
-    -X)
-      if [ "$2" ]; then
-        X=$2
-        shift
-      fi
-      ;;
-    --clean)
-      cleaning=true
-      ;;
-    --machine)
-      if [ "$2" ]; then
-        machine=$2
-        shift
-      fi
-      ;;
-    --make)
-      make_flag=true
-      ;;
-    --rm)
-      rm_flag=true
-      ;;
-    --) # End of all options
-      shift
-      break
-      ;;
-    -?*) # Unknown option
-      printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
-      ;;
-    *) # No more options
-      break
-  esac
-  shift
+    case $1 in
+        -N)
+            if [ "$2" ]; then
+                N=$2
+                shift
+            fi
+            ;;
+        -p)
+            if [ "$2" ]; then
+                particle=$2
+                shift
+            fi
+            ;;
+        -e)
+            if [ "$2" ]; then
+                energy=$2
+                shift
+            fi
+            ;;
+        -x)
+            if [ "$2" ]; then
+                X=$2
+                shift
+            fi
+            ;;
+        -y)
+            if [ "$2" ]; then
+                Y=$2
+                shift
+            fi
+            ;;
+        -z)
+            if [ "$2" ]; then
+                Z=$2
+                shift
+            fi
+            ;;
+        --dx)
+            if [ "$2" ]; then
+                DX=$2
+                shift
+            fi
+            ;;
+        --dy)
+            if [ "$2" ]; then
+                DY=$2
+                shift
+            fi
+            ;;
+        --dz)
+            if [ "$2" ]; then
+                DZ=$2
+                shift
+            fi
+            ;;
+        --phi)
+            if [ "$2" ]; then
+                phi=$2
+                shift
+            fi
+            ;;
+        --dphi)
+            if [ "$2" ]; then
+                dphi=$2
+                shift
+            fi
+            ;;
+        --theta)
+            if [ "$2" ]; then
+                theta=$2
+                shift
+            fi
+            ;;
+        --dtheta)
+            if [ "$2" ]; then
+                dtheta=$2
+                shift
+            fi
+            ;;
+        -t)
+            if [ "$2" ]; then
+                tag=$2
+                shift
+            fi
+            ;;
+        -l)
+            if [ "$2" ]; then
+                label=$2
+                shift
+            fi
+            ;;
+        -i)
+            if [ "$2" ]; then
+                index=$2
+                shift
+            fi
+            ;;
+        --rm)
+            rm_flag=true
+            ;;
+        --) # End of all options
+            shift
+            break
+            ;;
+        -?*) # Unknown option
+            printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
+            ;;
+        *) # No more options
+            break
+    esac
+    shift
 done
 
-if [ "$cleaning" = true ]; then
-  $HOME/scripts/cleaning.sh
-fi
+XYZ="${X} ${Y} ${Z}"
+log="$HOME/public/Output_log/logs_${label}.log"
 
-if [ "$make_flag" = true ]; then
-  make_hatRecon
-fi
+# Particle gun
+gun_output="$HOME/public/Output_root/MC/1_gun_${label}.root"
+gun_flags="-b baseline-2024 -N ${N} -x ${X} -y ${Y} -z ${Z} --dx ${DX} --dy ${DY} --dz ${DZ} -n ${gun_output} -- ${particle} ${energy} ${phi} ${dphi} ${theta} ${dtheta}"
+echo "logs:             ${log}"
+echo "gun_flags:        ${gun_flags}"
+echo "gun_output:       ${gun_output}"
+echo "--- STEP 1:  PARTICLE GUN  ---" > "${log}"
+$HOME/scripts/particle_gun.sh ${gun_flags} &>> "${log}"
 
-label="MC_${particle}_${kinetic}MeV_x${X}_y${Y}_z${Z}_phi${phi}_theta${theta}"
+# DetResponseSim
+DetResSim_output="$HOME/public/Output_root/MC/2_DetResSim_${label}.root"
+echo "DetResSim_output: ${DetResSim_output}"
+echo -e "\n--- STEP 2: DETRESPONSESIM ---" >> "${log}"
+DETRESPONSESIM.exe ${gun_output} -o ${DetResSim_output} -R -O hat-only &>> ${log}
 
-flags="-p $particle -e $kinetic -x $X -y $Y -z $Z --dx $DX --dy $DY --dz $DZ --phi $phi --dphi $dphi --theta $theta --dtheta $dtheta"
-if [ "$tag" != "" ]; then
-  flags="${flags} -t $tag"
-fi
-# Batch or non-batch mode for number of events
-if [ $n -ne 0 ]; then
-  flags="${flags} -N $n"
-  label_job="${label}_N${n}"
-else
-  flags="${flags} -N $N"
-fi
-label="${label}_N${N}"
-# Add tag if any
-if [ "$tag" != "" ]; then
-  label="${label}_${tag}"
-fi
-# Remove intermediate files
-if [ "$rm_flag" = true ]; then
-  flags="${flags} --rm"
-fi
+# HATRecon
+HATRecon_output="$HOME/public/Output_root/MC/3_HATRecon_${label}.root"
+echo "HATRecon_output:  ${HATRecon_output}"
+echo -e "\n--- STEP 3:    HATRECON    ---" >> "${log}"
+./bin/HATRECON.exe ${DetResSim_output} -o ${HATRecon_output} -R &>> ${log}
 
+# TreeMaker
+TreeMaker_output="$HOME/public/Output_root/TreeMaker_${label}.root"
+echo "TreeMaker_output: ${TreeMaker_output}"
+echo -e "\n--- STEP 4:    TREEMAKER   ---" >> "${log}"
+./bin/HATRECONTREEMAKER.exe ${HATRecon_output} -O outfile=${TreeMaker_output} -R &>> ${log}
 
-
-### RUNNING ###
-# Interactive console
-if [ $n -eq 0 ]; then
-  echo "STARTING: Particle guns of ${N} events in interactive shell"
-  flags="${flags} -l ${label}"
-  $HOME/scripts/gun_init.sh ${flags}
-
-# Jobs
-else
-  echo "STARTING: Particle guns of ${N} events with jobs of ${n} events each"
-  if [ $N -eq $n ]; then
-    sbatch -t 1:00:00 -n 1 --mem 3GB --account t2k -p ${machine} $HOME/scripts/gun_init.sh ${flags} -l ${label}
-  else
-    for ((i=0; i<N/n; i++)); do
-      label_job_here="${label_job}_i${i}"
-      flags_job="${flags} -i ${i} -l ${label_job_here}"
-      job_mc=$(sbatch -t 1:00:00 -n 1 --mem 5GB --account t2k -p ${machine} $HOME/scripts/gun_init.sh ${flags_job})
-      job_mc_id="${job_mc_id}:$(echo $job_mc | awk '{print $NF}')"
-      files_data="${files_data} $HOME/public/Output_root/MC/2_DetResSim_${label_job_here}.root"
-      files_treemaker="${files_treemaker} $HOME/public/Output_root/TreeMaker_${label_job_here}.root"
-    done
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/TreeMerger.sh -t ${label} -f "${files_data}" -n public/data/MC/
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/TreeMerger.sh -t ${label} -f "${files_treemaker}" -n public/Output_root/TreeMaker_
-  fi
+if [[ "$rm_flag" = true ]]; then
+    rm ${HATRecon_output} ${gun_output} #${DetResSim_output} #${log}
 fi
