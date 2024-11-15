@@ -1,7 +1,4 @@
 #!/bin/bash
-source ~/.bashrc
-#flags (mandatory): -d datafile
-#flags (optional): -s starting at event number s ; -N number of events ; -n number of events per jobs
 
 start=0       # starting event
 N=0           # number of events analyzed (0: all)
@@ -81,13 +78,12 @@ done
 if [ "$cleaning" = true ]; then
   $HOME/scripts/cleaning.sh
 fi
-module load Libraries/fftw/3.3.10
+
 if [ "$make_flag" = true ]; then
   (cd $HOME/hatRecon/`nd280-system`
   cmake ../cmake/
   make -j16)
 fi
-module load Libraries/fftw/3.3.10
 
 # Handle case without -d flag
 if [ -z "$datafile" ]; then
@@ -152,7 +148,7 @@ else
       tag_iter="${datafile}_s${s}_n${n}${comment}"
       flags_iter_here="${flags_iter} -s ${s} -t ${tag_iter}"
       echo "flags_iter_here: ${flags_iter_here}"
-      job_hatrecon=$(sbatch -t 2:00:00 -n 1 --mem 6GB --account t2k -p ${machine} ./scripts/analysis.sh ${flags_iter_here})
+      job_hatrecon=$(sbatch -t 2:00:00 -n 1 --mem 8GB --account t2k -p ${machine} ./scripts/analysis.sh ${flags_iter_here})
       job_hatrecon_id="${job_hatrecon_id}:$(echo $job_hatrecon | awk '{print $NF}')"
       files_hatrecon="${files_hatrecon} /sps/t2k/tdaret/public/Output_root/HATRecon_${datafile}_s${s}_n${n}${comment}.root"
       files_treemaker="${files_treemaker} /sps/t2k/tdaret/public/Output_root/TreeMaker_${datafile}_s${s}_n${n}${comment}.root"

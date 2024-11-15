@@ -11,25 +11,25 @@ cleaning=false
 
 # flags for mc.sh
 # Gun type
-particle="proton"
-kinetic="100-2000"
+particle="mu-"
+kinetic="600"
 
 # Position (approximate values by scanning with the gun)
 #bHAT center:          (  0, -75, -192.5) cm
 #HAT half lengths:     (±97, ±35, ± 82.5) cm
 #HAT inner dimensions: (194,  70,  165)   cm
-X=0
-Y=105
-Z=-200
-DX=97
+X=90
+Y=113
+Z=-190
+DX=0
 DY=0
 DZ=80
 
 # Direction
 phi=-90
-dphi=20
+dphi=0
 theta=0
-dtheta=20
+dtheta=0
 
 # Parse command-line arguments
 while :; do
@@ -106,12 +106,15 @@ if [ "$make_flag" = true ]; then
   make_hatRecon
 fi
 
+flags="-p $particle -e $kinetic -x $X -y $Y -z $Z --dx $DX --dy $DY --dz $DZ --phi $phi --dphi $dphi --theta $theta --dtheta $dtheta"
+
 label="MC_${particle}_${kinetic}MeV_x${X}_y${Y}_z${Z}_phi${phi}_theta${theta}"
 
-flags="-p $particle -e $kinetic -x $X -y $Y -z $Z --dx $DX --dy $DY --dz $DZ --phi $phi --dphi $dphi --theta $theta --dtheta $dtheta"
+# Add tag if any
 if [ "$tag" != "" ]; then
-  flags="${flags} -t $tag"
+  label="${label}_${tag}"
 fi
+
 # Batch or non-batch mode for number of events
 if [ $n -ne 0 ]; then
   flags="${flags} -N $n"
@@ -120,15 +123,11 @@ else
   flags="${flags} -N $N"
 fi
 label="${label}_N${N}"
-# Add tag if any
-if [ "$tag" != "" ]; then
-  label="${label}_${tag}"
-fi
+
 # Remove intermediate files
 if [ "$rm_flag" = true ]; then
   flags="${flags} --rm"
 fi
-
 
 
 ### RUNNING ###
@@ -142,17 +141,17 @@ if [ $n -eq 0 ]; then
 else
   echo "STARTING: Particle guns of ${N} events with jobs of ${n} events each"
   if [ $N -eq $n ]; then
-    sbatch -t 1:00:00 -n 1 --mem 3GB --account t2k -p ${machine} $HOME/scripts/mc.sh ${flags} -l ${label}
+    sbatch -t 1:00:00 -n 1 --mem 4GB --account t2k -p ${machine} $HOME/scripts/mc.sh ${flags} -l ${label}
   else
     for ((i=0; i<N/n; i++)); do
       label_job_here="${label_job}_i${i}"
       flags_job="${flags} -i ${i} -l ${label_job_here}"
-      job_mc=$(sbatch -t 1:00:00 -n 1 --mem 4GB --account t2k -p ${machine} $HOME/scripts/mc.sh ${flags_job})
+      job_mc=$(sbatch -t 1:00:00 -n 1 --mem 6GB --account t2k -p ${machine} $HOME/scripts/mc.sh ${flags_job})
       job_mc_id="${job_mc_id}:$(echo $job_mc | awk '{print $NF}')"
-      files_data="${files_data} $HOME/public/Output_root/MC/2_DetResSim_${label_job_here}.root"
-      files_treemaker="${files_treemaker} $HOME/public/Output_root/TreeMaker_${label_job_here}.root"
+      files_drs="${files_drs} $HOME/public/data/MC/2_DetResSim_${label_job_here}.root"
+      files_treemaker="${files_treemaker} $HOME/public/Output_root/MC/TreeMaker_${label_job_here}.root"
     done
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/tree_merger.sh -t ${label} -f "${files_data}" -n public/data/MC/
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/tree_merger.sh -t ${label} -f "${files_treemaker}" -n public/Output_root/TreeMaker_
+    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/tree_merger.sh -t ${label} -f "${files_drs}" -n public/data/MC/
+    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/tree_merger.sh -t ${label} -f "${files_treemaker}" -n public/Output_root/MC/TreeMaker_
   fi
 fi

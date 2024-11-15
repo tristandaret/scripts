@@ -21,7 +21,7 @@ done
 
 rm -f $HOME/slurm-*.out
 rm -f $HOME/plots/*.pdf
-rm -f $HOME/hatRecon/${HATRECONCONFIG}/nd280Geant4Sim.*
+rm -f $HOME/nd280Geant4Sim.*
 rm -f $HOME/hatRecon/${HATRECONCONFIG}/core*
 
 if [ "$log" = true ]; then
