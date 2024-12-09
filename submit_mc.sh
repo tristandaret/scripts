@@ -18,15 +18,15 @@ kinetic="600"
 #bHAT center:          (  0, -75, -192.5) cm
 #HAT half lengths:     (±97, ±35, ± 82.5) cm
 #HAT inner dimensions: (194,  70,  165)   cm
-X=90
-Y=113
-Z=-190
+X=1
+Y=100
+Z=-275
 DX=0
 DY=0
-DZ=80
+DZ=0
 
 # Direction
-phi=-90
+phi=0
 dphi=0
 theta=0
 dtheta=0
@@ -151,7 +151,7 @@ else
       files_drs="${files_drs} $HOME/public/data/MC/2_DetResSim_${label_job_here}.root"
       files_treemaker="${files_treemaker} $HOME/public/Output_root/MC/TreeMaker_${label_job_here}.root"
     done
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/tree_merger.sh -t ${label} -f "${files_drs}" -n public/data/MC/
+    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/tree_merger.sh -t ${label} -f "${files_drs}" -n public/data/MC/Simu_
     sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/tree_merger.sh -t ${label} -f "${files_treemaker}" -n public/Output_root/MC/TreeMaker_
   fi
 fi

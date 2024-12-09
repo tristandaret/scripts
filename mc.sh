@@ -144,7 +144,7 @@ echo "logs:             ${log}"
 echo "gun_flags:        ${gun_flags}"
 echo "gun_output:       ${gun_output}"
 echo "--- STEP 1:  PARTICLE GUN  ---" > "${log}"
-# $HOME/scripts/particle_gun.sh ${gun_flags} &>> "${log}"
+$HOME/scripts/particle_gun.sh ${gun_flags} &>> "${log}"
 
 # DetResponseSim
 DetResSim_output="$HOME/public/data/MC/2_DetResSim_${label}.root"
@@ -165,5 +165,5 @@ echo -e "\n--- STEP 4:    TREEMAKER   ---" >> "${log}"
 $HOME/hatRecon/`nd280-system`/bin/HATRECONTREEMAKER.exe ${HATRecon_output} -O outfile=${TreeMaker_output} -R &>> ${log}
 
 if [[ "$rm_flag" = true ]]; then
-    rm ${HATRecon_output} #${gun_output} 
+    rm ${HATRecon_output} ${gun_output} 
 fi

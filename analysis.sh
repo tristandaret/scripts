@@ -75,6 +75,7 @@ echo "File used:        ${datafile}"
 # Output file names
 hatrecon_output="$HOME/public/Output_root/HATRecon_${tag}.root"
 treemaker_output="$HOME/public/Output_root/TreeMaker_${tag}.root"
+SR_output="$HOME/public/Output_root/SpatialResolution_${tag}.root"
 log="$HOME/public/Output_log/logs_${tag}.log"
 echo "logs:             ${log}"
 
@@ -96,13 +97,16 @@ echo "HATRecon output:  ${hatrecon_output}"
 echo "---    HATRECON    ---" > "${log}"
 
 if [[ ${tag} == *"MC"* ]]; then # MC data
+  echo "MC data case"
   ./bin/HATRECON.exe ${datafile} -o ${hatrecon_output} ${flags} &>> ${log}
 elif [[ ${tag} == *"R2021"* || ${tag} == *"R2022"* ]]; then #test beam data
+  echo "Test beam data case"
   geometry="/sps/t2k/wsaenz/My_files/detres_gun_nu_e_700MeV_g4mc_72800.root"
   echo "Geometry:       ${geometry}"
   echo "< hatRecon.TestBeamFile = ${datafile} >" > new_par.dat
   ./bin/HATRECON.exe -o ${hatrecon_output} ${geometry} -O par_override=./new_par.dat ${flags} &>> ${log}
 else # real data
+  echo "Real data case"
   geometry="/sps/t2k/tdaret/public/data/geom_baseline2024_50k.root"
   echo "Geometry:         ${geometry}"
   ./bin/HATRECON.exe -G ${geometry} -m ${datafile} -o ${hatrecon_output} ${flags} &>> ${log}
@@ -114,15 +118,12 @@ echo -e "\n---   TREEMAKER   ---" >> "${log}"
 
 ./bin/HATRECONTREEMAKER.exe -R -O outfile=${treemaker_output} ${hatrecon_output} &>> ${log}
 
+# echo "Running: SpatialResolution"
+# echo "SpatialResolution output: ${SR_output}"
+# echo -e "\n---   SPATIALRESOLUTION   ---" >> "${log}"
+
+# ./bin/SpatialResolution.exe -R -O outfile=${SR_output} ${hatrecon_output} &>> ${log}
+
 if [[ "$rm_flag" = true ]]; then
   rm ${hatrecon_output}
 fi
-
-
-# hatrecon_output_ref0="$HOME/public/Output_root/HATRecon_${datafile}_n1.root"
-# if [ "$nevent" -ne 1 ]; then
-#   if [[ ${datafile} == *"hatTop_cosmic"* ]]; then
-#     hadd -a ${hatrecon_output} ${hatrecon_output_ref0}
-#   fi
-#   ./bin/HATRECONTREEMAKER.exe -R -O outfile=${treemaker_output} ${hatrecon_output} &> ${treemaker_output_log}
-# fi

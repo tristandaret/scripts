@@ -89,7 +89,7 @@ if [ "$reco" != "" ]; then
                 files+=("dog1_00000920_${index}")
             done
         elif [ "$run" == "1022" ]; then
-            for i in {10..45}; do
+            for i in {0..45}; do
                 index=$(printf "%04d" $i)
                 files+=("dog1_00001022_${index}")
             done
