@@ -35,14 +35,14 @@ if [ -z "$REPLACEMENT_EXPRESSION" ]; then
     REPLACEMENT_EXPRESSION=""
 fi
 
-# Find all files containing the search expression in their names and rename them
-find "$DIRECTORY" -type f -name "*$SEARCH_EXPRESSION*" | while read FILE; do
-    # Generate the new file name by replacing the search expression with the replacement (or removing it)
-    NEW_FILE=$(echo "$FILE" | sed "s/$SEARCH_EXPRESSION/$REPLACEMENT_EXPRESSION/g")
+# Find all files containing the search expression in their names and rename them (non-recursively)
+find "$DIRECTORY" -maxdepth 1 -type f -name "*$SEARCH_EXPRESSION*" | while read FILE; do
+   # Generate the new file name by replacing the search expression with the replacement (or removing it)
+   NEW_FILE=$(echo "$FILE" | sed "s/$(echo "$SEARCH_EXPRESSION" | sed 's/[.[\*^$]/\\&/g')/$REPLACEMENT_EXPRESSION/g")
 
-    # Rename the file if the new file name is different
-    if [ "$FILE" != "$NEW_FILE" ]; then
-        mv "$FILE" "$NEW_FILE"
-        echo "$FILE -> $NEW_FILE"
-    fi
+   # Rename the file if the new file name is different
+   if [ "$FILE" != "$NEW_FILE" ]; then
+      mv "$FILE" "$NEW_FILE"
+      echo "$FILE -> $NEW_FILE"
+   fi
 done

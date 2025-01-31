@@ -64,11 +64,13 @@ if [ -z "$datafile" ] || [ -z "$tag" ]; then
 fi
 
 # # Define data file
-# datafile="$HOME/public/data/MC/${datafile}.root"
-if [[ "$datafile" == *"dog1"* ]]; then
-  datafile="/sps/t2k/Jparc/May_2024/dog1/${datafile}.daq.mid.gz"
+datarun="${datafile:0:${#datafile}-5}"
+if [[ "$datafile" == *"hat"* ]]; then
+  datafile="/sps/t2k/Jparc/May_2024/${datafile}.daq.mid.gz"
+elif [[ "$datafile" == *"dog1"* ]]; then
+  datafile="/sps/t2k/Jparc/May_2024/dog1/${datarun}/${datafile}.daq.mid.gz"
 elif [[ "$datafile" == *"MC"* ]]; then
-  datafile="$HOME/public/data/MC/${datafile}.root"
+  datafile="$HOME/public/data/MC/systLUT/${datafile}.root"
 fi
 echo "File used:        ${datafile}"
 
@@ -97,31 +99,26 @@ echo "HATRecon output:  ${hatrecon_output}"
 echo "---    HATRECON    ---" > "${log}"
 
 if [[ ${tag} == *"MC"* ]]; then # MC data
-  echo "MC data case"
   ./bin/HATRECON.exe ${datafile} -o ${hatrecon_output} ${flags} &>> ${log}
 elif [[ ${tag} == *"R2021"* || ${tag} == *"R2022"* ]]; then #test beam data
-  echo "Test beam data case"
   geometry="/sps/t2k/wsaenz/My_files/detres_gun_nu_e_700MeV_g4mc_72800.root"
   echo "Geometry:       ${geometry}"
   echo "< hatRecon.TestBeamFile = ${datafile} >" > new_par.dat
   ./bin/HATRECON.exe -o ${hatrecon_output} ${geometry} -O par_override=./new_par.dat ${flags} &>> ${log}
 else # real data
-  echo "Real data case"
   geometry="/sps/t2k/tdaret/public/data/geom_baseline2024_50k.root"
   echo "Geometry:         ${geometry}"
   ./bin/HATRECON.exe -G ${geometry} -m ${datafile} -o ${hatrecon_output} ${flags} &>> ${log}
 fi
 
-echo "Running: TreeMaker"
+echo "Running:          TreeMaker"
 echo "TreeMaker output: ${treemaker_output}"
 echo -e "\n---   TREEMAKER   ---" >> "${log}"
-
 ./bin/HATRECONTREEMAKER.exe -R -O outfile=${treemaker_output} ${hatrecon_output} &>> ${log}
 
 # echo "Running: SpatialResolution"
 # echo "SpatialResolution output: ${SR_output}"
 # echo -e "\n---   SPATIALRESOLUTION   ---" >> "${log}"
-
 # ./bin/SpatialResolution.exe -R -O outfile=${SR_output} ${hatrecon_output} &>> ${log}
 
 if [[ "$rm_flag" = true ]]; then

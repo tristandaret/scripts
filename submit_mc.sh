@@ -18,11 +18,11 @@ kinetic="600"
 #bHAT center:          (  0, -75, -192.5) cm
 #HAT half lengths:     (±97, ±35, ± 82.5) cm
 #HAT inner dimensions: (194,  70,  165)   cm
-X=1
-Y=100
+X=50
+Y=75
 Z=-275
-DX=0
-DY=0
+DX=50
+DY=35
 DZ=0
 
 # Direction
@@ -146,7 +146,7 @@ else
     for ((i=0; i<N/n; i++)); do
       label_job_here="${label_job}_i${i}"
       flags_job="${flags} -i ${i} -l ${label_job_here}"
-      job_mc=$(sbatch -t 1:00:00 -n 1 --mem 6GB --account t2k -p ${machine} $HOME/scripts/mc.sh ${flags_job})
+      job_mc=$(sbatch -t 1:00:00 -n 1 --mem 4GB --account t2k -p ${machine} $HOME/scripts/mc.sh ${flags_job})
       job_mc_id="${job_mc_id}:$(echo $job_mc | awk '{print $NF}')"
       files_drs="${files_drs} $HOME/public/data/MC/2_DetResSim_${label_job_here}.root"
       files_treemaker="${files_treemaker} $HOME/public/Output_root/MC/TreeMaker_${label_job_here}.root"

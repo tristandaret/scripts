@@ -150,7 +150,7 @@ $HOME/scripts/particle_gun.sh ${gun_flags} &>> "${log}"
 DetResSim_output="$HOME/public/data/MC/2_DetResSim_${label}.root"
 echo "DetResSim_output: ${DetResSim_output}"
 echo -e "\n--- STEP 2: DETRESPONSESIM ---" >> "${log}"
-$HOME/detResponseSim/`nd280-system`/bin/DETRESPONSESIM.exe ${gun_output} -o ${DetResSim_output} -R -O hat-only &>> ${log}
+DETRESPONSESIM.exe ${gun_output} -o ${DetResSim_output} -R -O hat-only &>> ${log}
 
 # HATRecon
 HATRecon_output="$HOME/public/Output_root/MC/3_HATRecon_${label}.root"
