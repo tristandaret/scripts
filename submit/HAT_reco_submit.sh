@@ -90,29 +90,29 @@ if [ -z "$datafile" ]; then
    # datafile="R2022_09_07-21_38_55-000" #CERN2022 muons +1GeV full mockup
    # datafile="hat_00000885_0000"
    # datafile="MC_mu+_50-3000MeV_x0_y105_z-200_phi-90_theta0_N20000"
-   # datafile="Simu_MC_mu-_600MeV_x50_y115_z-250_phi-90_theta0_systLUT"
-   # datafile="Simu_MC_mu-_600MeV_x50_y113_z-275_phi-40_theta0_systLUT"
-   # datafile="Simu_MC_mu-_600MeV_x50_y113_z-275_phi0_theta0_systLUT"
-   # datafile="Simu_MC_mu-_600MeV_x96_y100_z-275_phi0_theta0_systLUT_N5000"
-   # datafile="Simu_MC_mu-_600MeV_x96_y100_z-275_phi-40_theta0_systLUT_N5000"
+   # datafile="DRS_MC_mu-_600MeV_x50_y115_z-250_phi-90_theta0_systLUT"
+   # datafile="DRS_MC_mu-_600MeV_x50_y113_z-275_phi-40_theta0_systLUT"
+   # datafile="DRS_MC_mu-_600MeV_x50_y113_z-275_phi0_theta0_systLUT"
+   # datafile="DRS_MC_mu-_600MeV_x96_y100_z-275_phi0_theta0_systLUT_N5000"
+   # datafile="DRS_MC_mu-_600MeV_x96_y100_z-275_phi-40_theta0_systLUT_N5000"
    # datafile="dog1_00001022_0000" # first wf bins a bit too early
    datafile="dog1_00001148_0000" # Default cosmics with B field
 fi
 
 flags="-d ${datafile}"
-tag="${datafile}"
+tags="${datafile}"
 
 # Handle case with optional flag
 if [ "$start" -ne 0 ]; then
   flags="${flags} -s ${start}"
 fi
-tag="${tag}_s${start}"
+tags="${tags}_s${start}"
 
 if [ "$N" -ne 0 ]; then
   flags="${flags} -n ${N}"
-  tag="${tag}_n${N}"
+  tags="${tags}_n${N}"
 else
-  tag="${tag}_nAll"
+  tags="${tags}_nAll"
 fi
 
 if [ "$n" -ne 0 ]; then
@@ -120,9 +120,9 @@ if [ "$n" -ne 0 ]; then
 fi
 
 # Setting details
-tag="${tag}${comment}"
+tags="${tags}${comment}"
 # Final list of arguments
-flags="${flags} -t ${tag}"
+flags="${flags} --tags ${tags}"
 # Remove intermediate files
 if [[ "$rm_flag" = true ]]; then
   flags="${flags} --rm"
@@ -152,8 +152,8 @@ else
    # several jobs
    else
       for ((s = start; s < start+N; s += n)); do
-         tag_iter="${datafile}_s${s}_n${n}${comment}"
-         flags_iter_here="${flags_iter} -s ${s} -t ${tag_iter}"
+         tags_iter="${datafile}_s${s}_n${n}${comment}"
+         flags_iter_here="${flags_iter} -s ${s} --tags ${tags_iter}"
          echo "flags_iter_here: ${flags_iter_here}"
          job_hatrecon=$(sbatch -t 2:00:00 -n 1 --mem 4GB --account t2k -p ${machine} ./scripts/analysis.sh ${flags_iter_here})
          job_hatrecon_id="${job_hatrecon_id}:$(echo $job_hatrecon | awk '{print $NF}')"
@@ -161,8 +161,8 @@ else
          files_treemaker="${files_treemaker} /sps/t2k/tdaret/public/Output_root/TreeMaker_${datafile}_s${s}_n${n}${comment}.root"
          # files_SR="${files_SR} /sps/t2k/tdaret/public/Output_root/SpatialResolution_${datafile}_s${s}_n${n}${comment}.root"
       done
-      sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/tree_merger.sh -t ${tag} -f "${files_hatrecon}" -n public/Output_root/HATRecon_
-      sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/tree_merger.sh -t ${tag} -f "${files_treemaker}" -n public/Output_root/TreeMaker_
-      #  sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/tree_merger.sh -t ${tag} -f "${files_SR}" -n public/Output_root/SpatialResolution_
+      sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/tree_merger.sh --tags ${tags} -f "${files_hatrecon}" -n public/Output_root/HATRecon_
+      sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/tree_merger.sh --tags ${tags} -f "${files_treemaker}" -n public/Output_root/TreeMaker_
+      #  sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/tree_merger.sh --tags ${tags} -f "${files_SR}" -n public/Output_root/SpatialResolution_
    fi
 fi

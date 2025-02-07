@@ -1,6 +1,6 @@
 #!/bin/bash
 
-### Default configuration: focused horizontal beam of 600 MeV muonsg
+### Default configuration: focused horizontal beam of 600 MeV muons
 # Gun type
 N=100
 particle="mu-"
@@ -22,7 +22,7 @@ dtheta=0
 index=-999
 
 # Tags
-label=""
+tags=""
 rm_flag=false
 
 
@@ -106,9 +106,9 @@ while :; do
                 shift
             fi
             ;;
-        -l)
+        --tags)
             if [ "$2" ]; then
-                label=$2
+                tags=$2
                 shift
             fi
             ;;
@@ -135,31 +135,31 @@ while :; do
 done
 
 XYZ="${X} ${Y} ${Z}"
-log="$HOME/public/Output_log/logs_${label}.log"
+log="$HOME/public/Output_log/logs_${tags}.log"
 
 # Particle gun
-gun_output="$HOME/public/data/MC/1_gun_${label}.root"
+gun_output="$HOME/public/data/MC/1_gun_${tags}.root"
 gun_flags="-b baseline-2024 -N ${N} -x ${X} -y ${Y} -z ${Z} --dx ${DX} --dy ${DY} --dz ${DZ} -n ${gun_output} -- ${particle} ${energy} ${phi} ${dphi} ${theta} ${dtheta}"
 echo "logs:             ${log}"
 echo "gun_flags:        ${gun_flags}"
 echo "gun_output:       ${gun_output}"
 echo "--- STEP 1:  PARTICLE GUN  ---" > "${log}"
-$HOME/scripts/particle_gun.sh ${gun_flags} &>> "${log}"
+$HOME/scripts/execute/particle_gun.sh ${gun_flags} &>> "${log}"
 
 # DetResponseSim
-DetResSim_output="$HOME/public/data/MC/2_DetResSim_${label}.root"
+DetResSim_output="$HOME/public/data/MC/2_DetResSim_${tags}.root"
 echo "DetResSim_output: ${DetResSim_output}"
 echo -e "\n--- STEP 2: DETRESPONSESIM ---" >> "${log}"
 DETRESPONSESIM.exe ${gun_output} -o ${DetResSim_output} -R -O hat-only &>> ${log}
 
 # HATRecon
-HATRecon_output="$HOME/public/Output_root/MC/3_HATRecon_${label}.root"
+HATRecon_output="$HOME/public/Output_root/MC/3_HATRecon_${tags}.root"
 echo "HATRecon_output:  ${HATRecon_output}"
 echo -e "\n--- STEP 3:    HATRECON    ---" >> "${log}"
 $HOME/hatRecon/`nd280-system`/bin/HATRECON.exe ${DetResSim_output} -o ${HATRecon_output} -R &>> ${log}
 
 # TreeMaker
-TreeMaker_output="$HOME/public/Output_root/MC/TreeMaker_${label}.root"
+TreeMaker_output="$HOME/public/Output_root/MC/TreeMaker_${tags}.root"
 echo "TreeMaker_output: ${TreeMaker_output}"
 echo -e "\n--- STEP 4:    TREEMAKER   ---" >> "${log}"
 $HOME/hatRecon/`nd280-system`/bin/HATRECONTREEMAKER.exe ${HATRecon_output} -O outfile=${TreeMaker_output} -R &>> ${log}

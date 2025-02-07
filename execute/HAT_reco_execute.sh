@@ -1,13 +1,12 @@
 #!/bin/bash
-#flags (mandatory): -d datafile and -t tag
-#flags (optional):  -n total number of events ; -s starting point
 
+original_dir=$(pwd)
 cd ~/hatRecon/`nd280-system`
 
 # Number of events
 start=0 # starting from event #
 nevent=0 # total number of events processed
-tag=""
+tags=""
 rm_flag=false
 
 # Parse command-line arguments
@@ -31,9 +30,9 @@ while :; do
         shift
       fi
       ;;
-    -t)
+    --tags)
       if [ "$2" ]; then
-        tag=$2
+        tags=$2
         shift
       fi
       ;;
@@ -57,12 +56,6 @@ while :; do
   shift
 done
 
-# Check if -d and -t flags are provided
-if [ -z "$datafile" ] || [ -z "$tag" ]; then
-  echo "analysis.sh usage: $0 [-s starting event | -n number of events ] -d datafile | -t tag"
-  exit 1
-fi
-
 # # Define data file
 datarun="${datafile:0:${#datafile}-5}"
 if [[ "$datafile" == *"hat"* ]]; then
@@ -75,10 +68,10 @@ fi
 echo "File used:        ${datafile}"
 
 # Output file names
-hatrecon_output="$HOME/public/Output_root/HATRecon_${tag}.root"
-treemaker_output="$HOME/public/Output_root/TreeMaker_${tag}.root"
-SR_output="$HOME/public/Output_root/SpatialResolution_${tag}.root"
-log="$HOME/public/Output_log/logs_${tag}.log"
+hatrecon_output="$HOME/public/Output_root/HATRecon_${tags}.root"
+treemaker_output="$HOME/public/Output_root/TreeMaker_${tags}.root"
+SR_output="$HOME/public/Output_root/SpatialResolution_${tags}.root"
+log="$HOME/public/Output_log/logs_${tags}.log"
 echo "logs:             ${log}"
 
 
@@ -98,9 +91,9 @@ echo "HATRecon flags:   ${flags}"
 echo "HATRecon output:  ${hatrecon_output}"
 echo "---    HATRECON    ---" > "${log}"
 
-if [[ ${tag} == *"MC"* ]]; then # MC data
+if [[ ${tags} == *"MC"* ]]; then # MC data
   ./bin/HATRECON.exe ${datafile} -o ${hatrecon_output} ${flags} &>> ${log}
-elif [[ ${tag} == *"R2021"* || ${tag} == *"R2022"* ]]; then #test beam data
+elif [[ ${tags} == *"R2021"* || ${tags} == *"R2022"* ]]; then #test beam data
   geometry="/sps/t2k/wsaenz/My_files/detres_gun_nu_e_700MeV_g4mc_72800.root"
   echo "Geometry:       ${geometry}"
   echo "< hatRecon.TestBeamFile = ${datafile} >" > new_par.dat
@@ -124,3 +117,5 @@ echo -e "\n---   TREEMAKER   ---" >> "${log}"
 if [[ "$rm_flag" = true ]]; then
   rm ${hatrecon_output}
 fi
+
+cd ${original_dir}
