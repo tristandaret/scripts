@@ -63,15 +63,21 @@ if [[ "$datafile" == *"hat"* ]]; then
 elif [[ "$datafile" == *"dog1"* ]]; then
   datafile="/sps/t2k/Jparc/May_2024/dog1/${datarun}/${datafile}.daq.mid.gz"
 elif [[ "$datafile" == *"MC"* ]]; then
-  datafile="$HOME/public/data/MC/systLUT/${datafile}.root"
+  datafile="$HOME/public/data/MC/${datafile}.root"
 fi
 echo "File used:        ${datafile}"
 
 # Output file names
-hatrecon_output="$HOME/public/Output_root/HATRecon_${tags}.root"
-treemaker_output="$HOME/public/Output_root/TreeMaker_${tags}.root"
-SR_output="$HOME/public/Output_root/SpatialResolution_${tags}.root"
-log="$HOME/public/Output_log/logs_${tags}.log"
+if [[ "$datafile" == *"MC"* ]]; then
+   hatrecon_output="$HOME/public/output_hatRecon/root/MC/HATRecon_${tags}.root"
+   treemaker_output="$HOME/public/output_hatRecon/root/MC/TreeMaker_${tags}.root"
+   SR_output="$HOME/public/output_hatRecon/root/MC/SpatialResolution_${tags}.root"
+else
+   hatrecon_output="$HOME/public/output_hatRecon/root/cosmics/HATRecon_${tags}.root"
+   treemaker_output="$HOME/public/output_hatRecon/root/cosmics/TreeMaker_${tags}.root"
+   SR_output="$HOME/public/output_hatRecon/root/cosmics/SpatialResolution_${tags}.root"
+fi
+log="$HOME/public/output_hatRecon/logs/logs_${tags}.log"
 echo "logs:             ${log}"
 
 

@@ -35,7 +35,10 @@ setup_my_nd280() {
    source /sps/t2k/tdaret/nd280_${version}/nd280SoftwareMaster_${version}/bin/setup.sh
    echo -e "\nSOURCING: SoftwareControl"
    source /sps/t2k/tdaret/nd280_${version}/nd280SoftwareControl_*/bin/setup.sh
-   echo -e "\nSOURCING: My hatRecon"
+}
+
+source_my_hatRecon() {
+   echo "SOURCING: My hatRecon"
    source $HOME/hatRecon/bin/setup.sh
 }
 
@@ -43,12 +46,12 @@ cmake_hatRecon() {
    source $HOME/hatRecon/bin/setup.sh
    (cd $HOME/hatRecon/$(nd280-system)
    cmake ../cmake/
-   make -j16)
+   make -j60)
 }
 
 make_hatRecon() {
    (cd $HOME/hatRecon/$(nd280-system)
-   make -j16)
+   make -j60)
 }
 
 
@@ -59,7 +62,7 @@ setup_highland() {
    source /pbs/throng/t2k/t2k_setup.sh
    source $HOME/highland/nd280SoftwarePilot/nd280SoftwarePilot.profile
    source $HOME/highland/highland2SoftwarePilot/highland2SoftwarePilot.profile
-   source $HOME/highland/highland2Master_4.14/bin/setup.sh
+   source $HOME/highland/highland2Master_*/bin/setup.sh
    source $HOME/highland/upgradeNueCCAnalysis/bin/setup.sh
    source $HOME/highland/upgradeGammaAnalysis/bin/setup.sh
    export CC=$(which gcc)
@@ -72,7 +75,7 @@ setup_highland() {
 }
 
 make_highland() {
-  highland-install -s -r -j10 -p prod8_V03 4.14
+  highland-install -s -r -j60 -p prod8_V03 4.14
 }
 
 

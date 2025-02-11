@@ -39,7 +39,7 @@ while :; do
       ;;
     --comment)
       if [ "$2" ]; then
-        comment=$2
+        comment=_$2
         shift
       fi
       ;;
@@ -95,8 +95,9 @@ if [ -z "$datafile" ]; then
    # datafile="DRS_MC_mu-_600MeV_x50_y113_z-275_phi0_theta0_systLUT"
    # datafile="DRS_MC_mu-_600MeV_x96_y100_z-275_phi0_theta0_systLUT_N5000"
    # datafile="DRS_MC_mu-_600MeV_x96_y100_z-275_phi-40_theta0_systLUT_N5000"
+   datafile="DRS_MC_gamma_600MeV_x-50_y-75_z-350_phi0_theta0_gamma_N100000"
    # datafile="dog1_00001022_0000" # first wf bins a bit too early
-   datafile="dog1_00001148_0000" # Default cosmics with B field
+   # datafile="dog1_00001148_0000" # Default cosmics with B field
 fi
 
 flags="-d ${datafile}"
@@ -135,11 +136,11 @@ if [ ${n} -eq 0 ]; then
    if [ "$N" -ne 0 ]; then
       echo "STARTING: HATRecon for ${N} events in interactive shell"
       echo "flags:            ${flags}"
-      ./scripts/analysis.sh ${flags}
+      ./scripts/execute/HAT_reco_execute.sh ${flags}
    elif [ "$N" -eq 0 ]; then
       echo "STARTING: HATRecon for ALL events in one bash job"
       echo "flags:            ${flags}"
-      sbatch -t 5:00:00 -n 1 --mem 10GB --account t2k -p ${machine} ./scripts/analysis.sh ${flags}
+      sbatch -t 5:00:00 -n 1 --mem 10GB --account t2k -p ${machine} ./scripts/execute/HAT_reco_execute.sh ${flags}
    fi
 
 # Parallelization
@@ -148,21 +149,21 @@ else
    echo "flags: ${flags}"
    # single job
    if [ $N -eq $n ]; then
-      sbatch -t 3:00:00 -n 1 --mem 6GB --account t2k -p ${machine} ./scripts/analysis.sh ${flags}
+      sbatch -t 3:00:00 -n 1 --mem 6GB --account t2k -p ${machine} ./scripts/execute/HAT_reco_execute.sh ${flags}
    # several jobs
    else
       for ((s = start; s < start+N; s += n)); do
          tags_iter="${datafile}_s${s}_n${n}${comment}"
          flags_iter_here="${flags_iter} -s ${s} --tags ${tags_iter}"
          echo "flags_iter_here: ${flags_iter_here}"
-         job_hatrecon=$(sbatch -t 2:00:00 -n 1 --mem 4GB --account t2k -p ${machine} ./scripts/analysis.sh ${flags_iter_here})
+         job_hatrecon=$(sbatch -t 2:00:00 -n 1 --mem 4GB --account t2k -p ${machine} ./scripts/execute/HAT_reco_execute.sh ${flags_iter_here})
          job_hatrecon_id="${job_hatrecon_id}:$(echo $job_hatrecon | awk '{print $NF}')"
-         files_hatrecon="${files_hatrecon} /sps/t2k/tdaret/public/Output_root/HATRecon_${datafile}_s${s}_n${n}${comment}.root"
-         files_treemaker="${files_treemaker} /sps/t2k/tdaret/public/Output_root/TreeMaker_${datafile}_s${s}_n${n}${comment}.root"
-         # files_SR="${files_SR} /sps/t2k/tdaret/public/Output_root/SpatialResolution_${datafile}_s${s}_n${n}${comment}.root"
+         files_hatrecon="${files_hatrecon} /sps/t2k/tdaret/public/output_hatRecon/root/HATRecon_${datafile}_s${s}_n${n}${comment}.root"
+         files_treemaker="${files_treemaker} /sps/t2k/tdaret/public/output_hatRecon/root/TreeMaker_${datafile}_s${s}_n${n}${comment}.root"
+         # files_SR="${files_SR} /sps/t2k/tdaret/public/output_hatRecon/root/SpatialResolution_${datafile}_s${s}_n${n}${comment}.root"
       done
-      sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/tree_merger.sh --tags ${tags} -f "${files_hatrecon}" -n public/Output_root/HATRecon_
-      sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/tree_merger.sh --tags ${tags} -f "${files_treemaker}" -n public/Output_root/TreeMaker_
-      #  sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/tree_merger.sh --tags ${tags} -f "${files_SR}" -n public/Output_root/SpatialResolution_
+      sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/t2k_utils/tree_merger.sh --tags ${tags} -f "${files_hatrecon}" -n public/output_hatRecon/root/HATRecon_
+      sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/t2k_utils/tree_merger.sh --tags ${tags} -f "${files_treemaker}" -n public/output_hatRecon/root/TreeMaker_
+      #  sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_hatrecon_id ./scripts/tree_merger.sh --tags ${tags} -f "${files_SR}" -n public/output_hatRecon/root/SpatialResolution_
    fi
 fi

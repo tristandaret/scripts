@@ -3,12 +3,12 @@
 ### Default configuration: focused horizontal beam of 600 MeV muons
 # Gun type
 N=100
-particle="mu-"
+particle="gamma"
 energy="600"
 # Position
 X=-50
 Y=-75
-Z=-375
+Z=-350
 DX=0
 DY=0
 DZ=0
@@ -17,9 +17,6 @@ phi=0
 dphi=0
 theta=0
 dtheta=0
-
-# Parallelization 
-index=-999
 
 # Tags
 tags=""
@@ -112,12 +109,6 @@ while :; do
                 shift
             fi
             ;;
-        -i)
-            if [ "$2" ]; then
-                index=$2
-                shift
-            fi
-            ;;
         --rm)
             rm_flag=true
             ;;
@@ -134,36 +125,41 @@ while :; do
     shift
 done
 
-XYZ="${X} ${Y} ${Z}"
-log="$HOME/public/Output_hatRecon/logs/logs_${tags}.log"
+logs="$HOME/public/output_nd280/logs/logs_${tags}.log"
 
 # Particle gun
-gun_output="$HOME/public/data/MC/1_gun_${tags}.root"
+gun_output="$HOME/public/data/MC/1_PG_${tags}.root"
 gun_flags="-b baseline-2024 -N ${N} -x ${X} -y ${Y} -z ${Z} --dx ${DX} --dy ${DY} --dz ${DZ} -n ${gun_output} -- ${particle} ${energy} ${phi} ${dphi} ${theta} ${dtheta}"
-echo "logs:             ${log}"
-echo "gun_flags:        ${gun_flags}"
-echo "gun_output:       ${gun_output}"
-echo "--- STEP 1:  PARTICLE GUN  ---" > "${log}"
-$HOME/scripts/execute/particle_gun.sh ${gun_flags} &>> "${log}"
+echo "logs:                  ${logs}"
+echo "gun flags:             ${gun_flags}"
+echo "gun output:            ${gun_output}"
+echo "--- STEP 1: PARTICLE GUN  ---" > "${logs}"
+time $HOME/scripts/execute/particle_gun.sh ${gun_flags} &>> "${logs}"
 
 # DetResponseSim
-DetResSim_output="$HOME/public/data/MC/2_DetResSim_${tags}.root"
-echo "DetResSim_output: ${DetResSim_output}"
-echo -e "\n--- STEP 2: DETRESPONSESIM ---" >> "${log}"
-DETRESPONSESIM.exe ${gun_output} -o ${DetResSim_output} -R -O hat-only &>> ${log}
+DetResSim_output="$HOME/public/data/MC/2_DRS_${tags}.root"
+echo "DetResponseSim output: ${DetResSim_output}"
+echo -e "\n--- STEP 2: DETRESPONSESIM ---" >> "${logs}"
+time DETRESPONSESIM.exe ${gun_output} -o ${DetResSim_output} -R &>> ${logs}
 
-# HATRecon
-HATRecon_output="$HOME/public/Output_hatRecon/root/MC/3_HATRecon_${tags}.root"
-echo "HATRecon_output:  ${HATRecon_output}"
-echo -e "\n--- STEP 3:    HATRECON    ---" >> "${log}"
-$HOME/hatRecon/`nd280-system`/bin/HATRECON.exe ${DetResSim_output} -o ${HATRecon_output} -R &>> ${log}
+# EventCalib
+eventCalib_output="$HOME/public/output_nd280/root/MC/3_eventCalib_${tags}.root"
+echo "eventCalib output:     ${eventCalib_output}"
+echo -e "\n--- STEP 3: EVENTCALIB    ---" >> "${logs}"
+time RunEventCalib.exe ${DetResSim_output} -o ${eventCalib_output} -R &>> ${logs}
 
-# TreeMaker
-TreeMaker_output="$HOME/public/Output_hatRecon/root/MC/TreeMaker_${tags}.root"
-echo "TreeMaker_output: ${TreeMaker_output}"
-echo -e "\n--- STEP 4:    TREEMAKER   ---" >> "${log}"
-$HOME/hatRecon/`nd280-system`/bin/HATRECONTREEMAKER.exe ${HATRecon_output} -O outfile=${TreeMaker_output} -R &>> ${log}
+# EventRecon
+eventRecon_output="$HOME/public/output_nd280/root/MC/4_eventRecon_${tags}.root"
+echo "eventRecon output:     ${eventRecon_output}"
+echo -e "\n--- STEP 4: EVENTRECON   ---" >> "${logs}"
+time RunEventRecon.exe ${eventCalib_output} -o ${eventRecon_output} -R &>> ${logs}
+
+# EventAnalysis
+eventAnalysis_output="$HOME/public/output_nd280/root/MC/5_eventAnalysis_${tags}.root"
+echo "eventAnalysis output:  ${eventAnalysis_output}"
+echo -e "\n--- STEP 5: EVENTANALYSIS ---" >> "${logs}"
+time RunEventAnalysis.exe ${eventRecon_output} -o ${eventAnalysis_output} -R &>> ${logs}
 
 if [[ "$rm_flag" = true ]]; then
-    rm ${HATRecon_output} ${gun_output} 
+    rm ${gun_output} ${eventCalib_output} ${eventRecon_output}
 fi

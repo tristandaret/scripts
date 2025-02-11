@@ -61,7 +61,7 @@ if [ "$clone" = true ]; then
 fi
 
 if [ "$skip" = true ]; then
-   nd280-install -s -j${cores} -s ${version}
+   nd280-install -s -j${cores} ${version}
 fi
 
 cd $dir0
