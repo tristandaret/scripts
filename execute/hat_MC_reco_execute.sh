@@ -152,18 +152,18 @@ echo "DetResSim_output: ${DetResSim_output}"
 echo -e "\n--- STEP 2: DETRESPONSESIM ---" >> "${log}"
 DETRESPONSESIM.exe ${gun_output} -o ${DetResSim_output} -R -O hat-only &>> ${log}
 
-# HATRecon
-HATRecon_output="$HOME/public/Output_hatRecon/root/MC/3_HATRecon_${tags}.root"
-echo "HATRecon_output:  ${HATRecon_output}"
+# hatRecon
+hatRecon_output="$HOME/public/Output_hatRecon/root/MC/3_hatRecon_${tags}.root"
+echo "hatRecon_output:  ${hatRecon_output}"
 echo -e "\n--- STEP 3:    HATRECON    ---" >> "${log}"
-$HOME/hatRecon/`nd280-system`/bin/HATRECON.exe ${DetResSim_output} -o ${HATRecon_output} -R &>> ${log}
+$HOME/hatRecon/`nd280-system`/bin/HATRECON.exe ${DetResSim_output} -o ${hatRecon_output} -R &>> ${log}
 
 # TreeMaker
 TreeMaker_output="$HOME/public/Output_hatRecon/root/MC/TreeMaker_${tags}.root"
 echo "TreeMaker_output: ${TreeMaker_output}"
 echo -e "\n--- STEP 4:    TREEMAKER   ---" >> "${log}"
-$HOME/hatRecon/`nd280-system`/bin/HATRECONTREEMAKER.exe ${HATRecon_output} -O outfile=${TreeMaker_output} -R &>> ${log}
+$HOME/hatRecon/`nd280-system`/bin/HATRECONTREEMAKER.exe ${hatRecon_output} -O outfile=${TreeMaker_output} -R &>> ${log}
 
 if [[ "$rm_flag" = true ]]; then
-    rm ${HATRecon_output} ${gun_output} 
+    rm ${hatRecon_output} ${gun_output} 
 fi

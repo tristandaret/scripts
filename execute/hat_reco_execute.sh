@@ -56,7 +56,7 @@ while :; do
   shift
 done
 
-# # Define data file
+# Define data file
 datarun="${datafile:0:${#datafile}-5}"
 if [[ "$datafile" == *"hat"* ]]; then
   datafile="/sps/t2k/Jparc/May_2024/${datafile}.daq.mid.gz"
@@ -69,11 +69,11 @@ echo "File used:        ${datafile}"
 
 # Output file names
 if [[ "$datafile" == *"MC"* ]]; then
-   hatrecon_output="$HOME/public/output_hatRecon/root/MC/HATRecon_${tags}.root"
+   hatrecon_output="$HOME/public/output_hatRecon/root/MC/hatRecon_${tags}.root"
    treemaker_output="$HOME/public/output_hatRecon/root/MC/TreeMaker_${tags}.root"
    SR_output="$HOME/public/output_hatRecon/root/MC/SpatialResolution_${tags}.root"
 else
-   hatrecon_output="$HOME/public/output_hatRecon/root/cosmics/HATRecon_${tags}.root"
+   hatrecon_output="$HOME/public/output_hatRecon/root/cosmics/hatRecon_${tags}.root"
    treemaker_output="$HOME/public/output_hatRecon/root/cosmics/TreeMaker_${tags}.root"
    SR_output="$HOME/public/output_hatRecon/root/cosmics/SpatialResolution_${tags}.root"
 fi
@@ -92,9 +92,9 @@ if [ "$nevent" -ne 0 ]; then
 fi
 
 
-echo "Running:          HATRecon"
-echo "HATRecon flags:   ${flags}"
-echo "HATRecon output:  ${hatrecon_output}"
+echo "Running:          hatRecon"
+echo "hatRecon flags:   ${flags}"
+echo "hatRecon output:  ${hatrecon_output}"
 echo "---    HATRECON    ---" > "${log}"
 
 if [[ ${tags} == *"MC"* ]]; then # MC data

@@ -68,7 +68,7 @@ if [ "$anal" = true ] || [ "$all" = true ]; then
 fi
 
 if [ "$highland" = true ] || [ "$all" = true ]; then
-   rm -f $HOME/public/output_highland/highland_*.root
+   rm -f $HOME/public/output_highland/root/*/*.root
 fi
 
 if [ "$tree" = true ] || [ "$all" = true ]; then

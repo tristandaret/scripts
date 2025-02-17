@@ -11,8 +11,6 @@ setup_nd280() {
    echo "SOURCING: ND280Software"
    source /pbs/throng/t2k/t2k_setup.sh
    pbs_nd280 ${version}
-   echo "SOURCING: My hatRecon"
-   source $HOME/hatRecon/bin/setup.sh
 }
 
 setup_my_nd280() {
@@ -59,7 +57,6 @@ make_hatRecon() {
 #######################################################################################################################
 export IS_HIGHLAND_SETUP=0
 setup_highland() {
-   source /pbs/throng/t2k/t2k_setup.sh
    source $HOME/highland/nd280SoftwarePilot/nd280SoftwarePilot.profile
    source $HOME/highland/highland2SoftwarePilot/highland2SoftwarePilot.profile
    source $HOME/highland/highland2Master_*/bin/setup.sh
@@ -76,6 +73,19 @@ setup_highland() {
 
 make_highland() {
   highland-install -s -r -j60 -p prod8_V03 4.14
+}
+
+cmake_gamma() {
+  (cd $HOME/highland/upgradeGammaAnalysis/`nd280-system`
+   cmake ../cmake/
+   make -j60
+   source $HOME/highland/upgradeGammaAnalysis/bin/setup.sh)
+}
+
+make_gamma() {
+  (cd $HOME/highland/upgradeGammaAnalysis/`nd280-system`
+   make -j60
+   source $HOME/highland/upgradeGammaAnalysis/bin/setup.sh)
 }
 
 
