@@ -135,7 +135,7 @@ while :; do
 done
 
 XYZ="${X} ${Y} ${Z}"
-log="$HOME/public/Output_hatRecon/logs/logs_${tags}.log"
+log="$HOME/public/output_hatRecon/logs/logs_${tags}.log"
 
 # Particle gun
 gun_output="$HOME/public/data/MC/1_gun_${tags}.root"
@@ -144,26 +144,32 @@ echo "logs:             ${log}"
 echo "gun_flags:        ${gun_flags}"
 echo "gun_output:       ${gun_output}"
 echo "--- STEP 1:  PARTICLE GUN  ---" > "${log}"
-$HOME/scripts/execute/particle_gun.sh ${gun_flags} &>> "${log}"
+time $HOME/scripts/execute/particle_gun.sh ${gun_flags} &>> "${log}"
 
 # DetResponseSim
-DetResSim_output="$HOME/public/data/MC/2_DetResSim_${tags}.root"
+DetResSim_output="$HOME/public/data/MC/2_DRS_${tags}.root"
 echo "DetResSim_output: ${DetResSim_output}"
 echo -e "\n--- STEP 2: DETRESPONSESIM ---" >> "${log}"
-DETRESPONSESIM.exe ${gun_output} -o ${DetResSim_output} -R -O hat-only &>> ${log}
+time DETRESPONSESIM.exe ${gun_output} -o ${DetResSim_output} -R -O hat-only &>> ${log}
+
+# EventCalib
+EventCalib_output="$HOME/public/output_hatRecon/root/MC/3_EventCalib_${tags}.root"
+echo "EventCalib_output: ${EventCalib_output}"
+echo -e "\n--- STEP 3:   EVENTCALIB   ---" >> "${log}"
+time RunEventCalib.exe ${DetResSim_output} -o ${EventCalib_output} -R &>> ${log}
 
 # hatRecon
-hatRecon_output="$HOME/public/Output_hatRecon/root/MC/3_hatRecon_${tags}.root"
+hatRecon_output="$HOME/public/output_hatRecon/root/MC/4_hatRecon_${tags}.root"
 echo "hatRecon_output:  ${hatRecon_output}"
-echo -e "\n--- STEP 3:    HATRECON    ---" >> "${log}"
-$HOME/hatRecon/`nd280-system`/bin/HATRECON.exe ${DetResSim_output} -o ${hatRecon_output} -R &>> ${log}
+echo -e "\n--- STEP 4:    HATRECON    ---" >> "${log}"
+time $HOME/hatRecon/`nd280-system`/bin/HATRECON.exe ${EventCalib_output} -o ${hatRecon_output} -R &>> ${log}
 
 # TreeMaker
-TreeMaker_output="$HOME/public/Output_hatRecon/root/MC/TreeMaker_${tags}.root"
+TreeMaker_output="$HOME/public/output_hatRecon/root/MC/TreeMaker_${tags}.root"
 echo "TreeMaker_output: ${TreeMaker_output}"
-echo -e "\n--- STEP 4:    TREEMAKER   ---" >> "${log}"
-$HOME/hatRecon/`nd280-system`/bin/HATRECONTREEMAKER.exe ${hatRecon_output} -O outfile=${TreeMaker_output} -R &>> ${log}
+echo -e "\n--- STEP 5:    TREEMAKER   ---" >> "${log}"
+time $HOME/hatRecon/`nd280-system`/bin/HATRECONTREEMAKER.exe ${hatRecon_output} -O outfile=${TreeMaker_output} -R &>> ${log}
 
 if [[ "$rm_flag" = true ]]; then
-    rm ${hatRecon_output} ${gun_output} 
+    rm ${gun_output} ${EventCalib_output} #${hatRecon_output}
 fi

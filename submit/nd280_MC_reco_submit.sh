@@ -10,7 +10,7 @@ cleaning=false
 
 # flags for mc.sh
 # Gun type
-particle="gamma"
+particle="mu-"
 kinetic="600"
 
 # Position (approximate values by scanning with the gun)
@@ -18,15 +18,15 @@ kinetic="600"
 #HAT half lengths:     (±97, ±35, ± 82.5) cm
 #HAT inner dimensions: (194,  70,  165)   cm
 X=-50
-Y=0
-Z=-300
+Y=75
+Z=-275
 DX=0
 DY=0
 DZ=0
 
 # Direction
 phi=0
-dphi=45
+dphi=0
 theta=0
 dtheta=0
 

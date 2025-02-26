@@ -1,59 +1,64 @@
 #!/bin/bash
 
-original_dir=$(pwd)
-cd ~/hatRecon/`nd280-system`
-
 # Number of events
 start=0 # starting from event #
 nevent=0 # total number of events processed
 tags=""
 rm_flag=false
+SR_flag=false
+AC_flag=false
 
 # Parse command-line arguments
 while :; do
-  case $1 in
-    -s)
+   case $1 in
+      -s)
       if [ "$2" ]; then
-        start=$2
-        shift
+         start=$2
+         shift
       fi
       ;;
-    -n)
+      -n)
       if [ "$2" ]; then
-        nevent=$2
-        shift
+         nevent=$2
+         shift
       fi 
       ;;
-    -d)
+      -d)
       if [ "$2" ]; then
-        datafile=$2
-        shift
+         datafile=$2
+         shift
       fi
       ;;
-    --tags)
+      --tags)
       if [ "$2" ]; then
-        tags=$2
-        shift
+         tags=$2
+         shift
       fi
       ;;
-    --rm)
+      --sr)
+         SR_flag=true
+      ;;
+      --ac)
+         AC_flag=true
+      ;;
+      --rm)
       rm_flag=true
       ;;
-    --) # End of all options
+      --) # End of all options
       shift
       break
       ;;
-    -?*) # Unknown option
+      -?*) # Unknown option
       printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
       ;;
-    -*) # Missing argument
+      -*) # Missing argument
       printf 'ERROR: Option requires an argument: %s\n' "$1" >&2
       exit 1
       ;;
-    *) # No more options
+      *) # No more options
       break
-  esac
-  shift
+   esac
+   shift
 done
 
 # Define data file
@@ -72,10 +77,12 @@ if [[ "$datafile" == *"MC"* ]]; then
    hatrecon_output="$HOME/public/output_hatRecon/root/MC/hatRecon_${tags}.root"
    treemaker_output="$HOME/public/output_hatRecon/root/MC/TreeMaker_${tags}.root"
    SR_output="$HOME/public/output_hatRecon/root/MC/SpatialResolution_${tags}.root"
+   AC_output="$HOME/public/output_hatRecon/root/MC/AnaCosmics_${tags}.root"
 else
    hatrecon_output="$HOME/public/output_hatRecon/root/cosmics/hatRecon_${tags}.root"
    treemaker_output="$HOME/public/output_hatRecon/root/cosmics/TreeMaker_${tags}.root"
    SR_output="$HOME/public/output_hatRecon/root/cosmics/SpatialResolution_${tags}.root"
+   AC_output="$HOME/public/output_hatRecon/root/cosmics/AnaCosmics_${tags}.root"
 fi
 log="$HOME/public/output_hatRecon/logs/logs_${tags}.log"
 echo "logs:             ${log}"
@@ -95,33 +102,40 @@ fi
 echo "Running:          hatRecon"
 echo "hatRecon flags:   ${flags}"
 echo "hatRecon output:  ${hatrecon_output}"
-echo "---    HATRECON    ---" > "${log}"
+echo "--- STEP 1:   HATRECON    ---" > "${log}"
 
 if [[ ${tags} == *"MC"* ]]; then # MC data
-  ./bin/HATRECON.exe ${datafile} -o ${hatrecon_output} ${flags} &>> ${log}
+  time $HOME/hatRecon/`nd280-system`/bin/HATRECON.exe ${datafile} -o ${hatrecon_output} ${flags} &>> ${log}
 elif [[ ${tags} == *"R2021"* || ${tags} == *"R2022"* ]]; then #test beam data
   geometry="/sps/t2k/wsaenz/My_files/detres_gun_nu_e_700MeV_g4mc_72800.root"
   echo "Geometry:       ${geometry}"
   echo "< hatRecon.TestBeamFile = ${datafile} >" > new_par.dat
-  ./bin/HATRECON.exe -o ${hatrecon_output} ${geometry} -O par_override=./new_par.dat ${flags} &>> ${log}
+  time $HOME/hatRecon/`nd280-system`/bin/HATRECON.exe -o ${hatrecon_output} ${geometry} -O par_override=./new_par.dat ${flags} &>> ${log}
 else # real data
   geometry="/sps/t2k/tdaret/public/data/geom_baseline2024_50k.root"
   echo "Geometry:         ${geometry}"
-  ./bin/HATRECON.exe -G ${geometry} -m ${datafile} -o ${hatrecon_output} ${flags} &>> ${log}
+  time $HOME/hatRecon/`nd280-system`/bin/HATRECON.exe -G ${geometry} -m ${datafile} -o ${hatrecon_output} ${flags} &>> ${log}
 fi
 
 echo "Running:          TreeMaker"
 echo "TreeMaker output: ${treemaker_output}"
-echo -e "\n---   TREEMAKER   ---" >> "${log}"
-./bin/HATRECONTREEMAKER.exe -R -O outfile=${treemaker_output} ${hatrecon_output} &>> ${log}
+echo -e "\n--- STEP2:  TREEMAKER   ---" >> "${log}"
+time $HOME/hatRecon/`nd280-system`/bin/HATRECONTREEMAKER.exe -R -O outfile=${treemaker_output} ${hatrecon_output} &>> ${log}
 
-# echo "Running: SpatialResolution"
-# echo "SpatialResolution output: ${SR_output}"
-# echo -e "\n---   SPATIALRESOLUTION   ---" >> "${log}"
-# ./bin/SpatialResolution.exe -R -O outfile=${SR_output} ${hatrecon_output} &>> ${log}
-
-if [[ "$rm_flag" = true ]]; then
-  rm ${hatrecon_output}
+if [[ "$SR_flag" = true ]]; then
+   echo "Running: SpatialResolution"
+   echo "SpatialResolution output: ${SR_output}"
+   echo -e "\n--- STEP3:  SPATIALRESOLUTION   ---" >> "${log}"
+   time $HOME/hatRecon/`nd280-system`/bin/SpatialResolution.exe -R -O outfile=${SR_output} ${hatrecon_output} &>> ${log}
 fi
 
-cd ${original_dir}
+if [[ "$AC_flag" = true ]]; then
+   echo "Running: AnaCosmics"
+   echo "AnaCosmics output: ${SR_output}"
+   echo -e "\n--- STEP4:  ANACOSMICS   ---" >> "${log}"
+   time $HOME/hatRecon/`nd280-system`/bin/ANACOSMICS.exe -R -O outfile=${AC_output} ${hatrecon_output} &>> ${log}
+fi
+
+if [[ "$rm_flag" = true ]]; then
+  rm -f ${SR_output} ${AC_output} #${hatrecon_output}
+fi

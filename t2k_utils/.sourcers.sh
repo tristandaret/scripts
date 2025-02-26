@@ -17,7 +17,7 @@ setup_my_nd280() {
    if [ -n "${1}" ]; then
       version=${1}
    else
-      version=14.29
+      version=14.31
    fi
    echo "SOURCING: my ND280Software"
    echo -e "\nSOURCING: SoftwarePilot"
@@ -62,6 +62,7 @@ setup_highland() {
    source $HOME/highland/highland2Master_*/bin/setup.sh
    source $HOME/highland/upgradeNueCCAnalysis/bin/setup.sh
    source $HOME/highland/upgradeGammaAnalysis/bin/setup.sh
+   source $HOME/highland/upgradeGammaHATAnalysis/bin/setup.sh
    export CC=$(which gcc)
    export CXX=$(which g++)
    export PATH=/pbs/throng/t2k/davix/install/bin:$PATH
@@ -76,16 +77,15 @@ make_highland() {
 }
 
 cmake_gamma() {
-  (cd $HOME/highland/upgradeGammaAnalysis/`nd280-system`
-   cmake ../cmake/
-   make -j60
-   source $HOME/highland/upgradeGammaAnalysis/bin/setup.sh)
+  (cd $HOME/highland/upgradeGammaHATAnalysis/`nd280-system`
+   cmake ../cmake
+   make_gamma)
 }
 
 make_gamma() {
-  (cd $HOME/highland/upgradeGammaAnalysis/`nd280-system`
+  (cd $HOME/highland/upgradeGammaHATAnalysis/`nd280-system`
    make -j60
-   source $HOME/highland/upgradeGammaAnalysis/bin/setup.sh)
+   source $HOME/highland/upgradeGammaHATAnalysis/bin/setup.sh)
 }
 
 

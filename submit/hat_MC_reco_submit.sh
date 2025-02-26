@@ -9,10 +9,10 @@ make_flag=false
 machine="htc"
 cleaning=false
 
-# flags for mc.sh
+# flags
 # Gun type
-particle="gamma"
-kinetic="600"
+particle="mu-"
+kinetic="400"
 
 # Position (approximate values by scanning with the gun)
 #bHAT center:          (  0, -75, -192.5) cm
@@ -20,9 +20,9 @@ kinetic="600"
 #HAT inner dimensions: (194,  70,  165)   cm
 X=0
 Y=75
-Z=-350
-DX=25
-DY=0
+Z=-300
+DX=90
+DY=30
 DZ=0
 
 # Direction
@@ -103,7 +103,8 @@ if [ "$cleaning" = true ]; then
 fi
 
 if [ "$make_flag" = true ]; then
-  make_hatRecon
+   source $HOME/scripts/t2k_utils/.sourcers.sh
+   make_hatRecon
 fi
 
 flags="-p $particle -e $kinetic -x $X -y $Y -z $Z --dx $DX --dy $DY --dz $DZ --phi $phi --dphi $dphi --theta $theta --dtheta $dtheta"
@@ -135,23 +136,23 @@ fi
 if [ $n -eq 0 ]; then
   echo "STARTING: Particle guns of ${N} events in interactive shell"
   flags="${flags} --tags ${tags}"
-  $HOME/scripts/mc.sh ${flags}
+  $HOME/scripts/execute/hat_MC_reco_execute.sh ${flags}
 
 # Jobs
 else
   echo "STARTING: Particle guns of ${N} events with jobs of ${n} events each"
   if [ $N -eq $n ]; then
-    sbatch -t 3:00:00 -n 1 --mem 6GB --account t2k -p ${machine} $HOME/scripts/mc.sh ${flags} --tags ${tags}
+    sbatch -t 3:00:00 -n 1 --mem 5GB --account t2k -p ${machine} $HOME/scripts/execute/hat_MC_reco_execute.sh ${flags} --tags ${tags}
   else
     for ((i=0; i<N/n; i++)); do
       tags_job_here="${tags_job}_i${i}"
       flags_job="${flags} -i ${i} --tags ${tags_job_here}"
-      job_mc=$(sbatch -t 1:00:00 -n 1 --mem 4GB --account t2k -p ${machine} $HOME/scripts/mc.sh ${flags_job})
+      job_mc=$(sbatch -t 1:00:00 -n 1 --mem 5GB --account t2k -p ${machine} $HOME/scripts/execute/hat_MC_reco_execute.sh ${flags_job})
       job_mc_id="${job_mc_id}:$(echo $job_mc | awk '{print $NF}')"
-      files_drs="${files_drs} $HOME/public/data/MC/2_DetResSim_${tags_job_here}.root"
-      files_treemaker="${files_treemaker} $HOME/public/Output_root/MC/TreeMaker_${tags_job_here}.root"
+      files_drs="${files_drs} $HOME/public/data/MC/2_DRS_${tags_job_here}.root"
+      files_treemaker="${files_treemaker} $HOME/public/output_hatRecon/root/MC/TreeMaker_${tags_job_here}.root"
     done
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/tree_merger.sh -t ${tags} -f "${files_drs}" -n public/data/MC/DRS_
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/tree_merger.sh -t ${tags} -f "${files_treemaker}" -n public/Output_root/MC/TreeMaker_
+    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/t2k_utils/tree_merger.sh -t ${tags} -f "${files_drs}" -n public/data/MC/
+    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/t2k_utils/tree_merger.sh -t ${tags} -f "${files_treemaker}" -n public/output_hatRecon/root/MC/TreeMaker_
   fi
 fi

@@ -7,8 +7,11 @@ fi
 
 start=0
 nevent=0
-datafile="oa_nt_beam_90020000-0000_oe4wxnujyrna_anal_000_bsdv01_2"
-datafolder="$HOME/public/output_nd280/root/MC"
+pkg="gammaHAT"
+datafile="eventAnalysis_MC_mu-_600MeV_x-50_y0_z-300_phi0_theta0_N10000" # Default
+# datafile="oa_nt_beam_90020000-0000_oe4wxnujyrna_anal_000_bsdv01_2" # Default
+datafolder="$HOME/public/output_nd280/root/MC" # Default
+# datafolder="/sps/t2k/common/inputs/dirac/t2k.org/nd280/production008/validation/V04/mcp/neut_5.6.4.1_p7c3/2024/magnet/13a_p250kA/runA/anal" # Default
 tag=""
 comment=""
 make_flag=false
@@ -42,6 +45,12 @@ while :; do
             shift
          fi
          ;;
+      --pkg)
+         if [ "$2" ]; then
+            pkg=$2
+            shift
+         fi
+         ;;
       --comment)
          if [ "$2" ]; then
             comment=$2
@@ -68,23 +77,38 @@ while :; do
    shift
 done
 
-# Check if make is required
+# ----- APP -----------------------------------------------------------------------------------------------------------
+if [ "$pkg" = "gammaHAT" ]; then
+   echo "Package:          gammaHAT"
+   package="upgradeGammaHATAnalysis"
+   app="RunUpgradeGammaHATAnalysis"
+elif [ "$pkg" = "gamma" ]; then
+   echo "Package:          gamma"
+   package="upgradeGammaAnalysis"
+   app="RunUpgradeGammaAnalysis"
+else
+   echo "ERROR: Unknown pkg"
+   exit 1
+fi
+
+# ----- MAKE ----------------------------------------------------------------------------------------------------------
 if [ "$make_flag" = true ]; then
-   echo "Making upgradeGammaAnalysis"
+   echo "Making upgradeGammaHATAnalysis"
    source $HOME/scripts/t2k_utils/.sourcers.sh
    make_gamma
 fi
 
-# Define default datafile
-if [ -z "${datafile}" ]; then
-   datafile="oa_nt_beam_90020000-0000_oe4wxnujyrna_anal_000_bsdv01_2"
-   datafolder="/sps/t2k/common/inputs/dirac/t2k.org/nd280/production008/validation/V04/mcp/neut_5.6.4.1_p7c3/2024/magnet/13a_p250kA/runA/anal"
+
+#  ----- DATAFILE -----------------------------------------------------------------------------------------------------
+# Precise data folder for each data file type
+if [[ ${datafile} == *"MC"* ]]; then # MC data
+   datafolder="$HOME/public/output_nd280/root/MC"
 fi
 echo "Data folder:      ${datafolder}"
 datapath="${datafolder}/${datafile}.root"
 echo "Data path:        ${datapath}"
 
-# Tag
+# ----- TAG -----------------------------------------------------------------------------------------------------------
 tag="${datafile#eventAnalysis_}" # remove prefix
 if [ "$start" -ne 0 ]; then
    tag="${tag}_s${start}"
@@ -98,11 +122,12 @@ if [ -n "$comment" ]; then
    tag="${tag}_${comment}"
 fi
 
-# Output file name
-highland_output="$HOME/public/output_highland/root/MC/gamma_${tag}.root"
-log="$HOME/public/output_highland/logs/logs_gamma_${tag}.log"
+#  ----- OUTPUT & LOGS ------------------------------------------------------------------------------------------------
+highland_output="$HOME/public/output_highland/root/MC/${pkg}_${tag}.root"
+log="$HOME/public/output_highland/logs/logs_${pkg}_${tag}.log"
 echo "logs:             ${log}"
 
+#  ----- FLAGS --------------------------------------------------------------------------------------------------------
 # Start process from event number # (optional)
 if [ "$start" -ne 0 ]; then
    flags="${flags} -s ${start}"
@@ -115,6 +140,7 @@ fi
 
 flags="${flags} -o ${highland_output}"
 
+#  ----- RUN HIGHLAND -------------------------------------------------------------------------------------------------
 # Check if output file already exists
 if [ -f "${highland_output}" ]; then
    read -p "/!\ Output file already exists. Do you want to remove it?" confirm
@@ -127,9 +153,10 @@ if [ -f "${highland_output}" ]; then
 fi
 
 # Run Highland
-echo "Running:          Highland"
+echo "Running:          ${package}"
 echo "Highland flags:   ${flags}"
 echo "Highland output:  ${highland_output}"
-echo "---    HIGHLAND HAT GAMMA SELECTION    ---" > "${log}"
+echo "---    HIGHLAND ${package} SELECTION    ---" > "${log}"
 
-./highland/upgradeGammaAnalysis/`nd280-system`/bin/RunUpgradeGammaAnalysis.exe ${flags} ${datapath} &>> ${log}
+${app}.exe ${flags} ${datapath} &>> ${log}
+DrawUpgradeGammaHATAnalysis.exe ${highland_output} all &>> ${log}
