@@ -5,24 +5,23 @@ N=500       # number of events
 n=0         # number of events per job
 comment=""
 rm_flag=false
-make_flag=false
 machine="htc"
 cleaning=false
 
-# flags
+# flags for mc.sh
 # Gun type
 particle="mu-"
-kinetic="400"
+kinetic="600"
 
 # Position (approximate values by scanning with the gun)
 #bHAT center:          (  0, -75, -192.5) cm
 #HAT half lengths:     (±97, ±35, ± 82.5) cm
 #HAT inner dimensions: (194,  70,  165)   cm
-X=0
+X=-50
 Y=75
-Z=-300
-DX=90
-DY=30
+Z=-275
+DX=0
+DY=0
 DZ=0
 
 # Direction
@@ -46,24 +45,6 @@ while :; do
         shift
       fi
       ;;
-    -X)
-      if [ "$2" ]; then
-        X=$2
-        shift
-      fi
-      ;;
-    -Y)
-      if [ "$2" ]; then
-        Y=$2
-        shift
-      fi
-      ;;
-    --phi)
-      if [ "$2" ]; then
-        phi=$2
-        shift
-      fi
-      ;;
     --comment)
       if [ "$2" ]; then
         comment=$2
@@ -78,9 +59,6 @@ while :; do
         machine=$2
         shift
       fi
-      ;;
-    --make)
-      make_flag=true
       ;;
     --rm)
       rm_flag=true
@@ -99,12 +77,7 @@ while :; do
 done
 
 if [ "$cleaning" = true ]; then
-  $HOME/scripts/cleaning.sh
-fi
-
-if [ "$make_flag" = true ]; then
-   source $HOME/scripts/t2k_utils/.sourcers.sh
-   make_hatRecon
+  $HOME/scripts/utils/cleaning.sh
 fi
 
 flags="-p $particle -e $kinetic -x $X -y $Y -z $Z --dx $DX --dy $DY --dz $DZ --phi $phi --dphi $dphi --theta $theta --dtheta $dtheta"
@@ -134,25 +107,25 @@ fi
 ### RUNNING ###
 # Interactive console
 if [ $n -eq 0 ]; then
-  echo "STARTING: Particle guns of ${N} events in interactive shell"
+  echo "STARTING: nd280 MC generation pipeline for ${N} events in interactive shell"
   flags="${flags} --tags ${tags}"
-  $HOME/scripts/execute/hat_MC_reco_execute.sh ${flags}
+  time $HOME/scripts/execute/nd280_MC_execute.sh ${flags}
 
 # Jobs
 else
-  echo "STARTING: Particle guns of ${N} events with jobs of ${n} events each"
+  echo "STARTING: ND280 MC generation pipeline of ${N} events with jobs of ${n} events each"
   if [ $N -eq $n ]; then
-    sbatch -t 3:00:00 -n 1 --mem 5GB --account t2k -p ${machine} $HOME/scripts/execute/hat_MC_reco_execute.sh ${flags} --tags ${tags}
+    sbatch -t 4:00:00 -n 1 --mem 5GB --account t2k -p ${machine} $HOME/scripts/execute/nd280_MC_execute.sh ${flags} --tags ${tags}
   else
     for ((i=0; i<N/n; i++)); do
       tags_job_here="${tags_job}_i${i}"
-      flags_job="${flags} -i ${i} --tags ${tags_job_here}"
-      job_mc=$(sbatch -t 1:00:00 -n 1 --mem 5GB --account t2k -p ${machine} $HOME/scripts/execute/hat_MC_reco_execute.sh ${flags_job})
+      flags_job="${flags} --tags ${tags_job_here}"
+      job_mc=$(sbatch -t 4:00:00 -n 1 --mem 5GB --account t2k -p ${machine} $HOME/scripts/execute/nd280_MC_execute.sh ${flags_job})
       job_mc_id="${job_mc_id}:$(echo $job_mc | awk '{print $NF}')"
       files_drs="${files_drs} $HOME/public/data/MC/2_DRS_${tags_job_here}.root"
-      files_treemaker="${files_treemaker} $HOME/public/output_hatRecon/root/MC/TreeMaker_${tags_job_here}.root"
+      files_eventAnalysis="${files_eventAnalysis} $HOME/public/output_nd280/root/MC/5_eventAnalysis_${tags_job_here}.root"
     done
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/t2k_utils/tree_merger.sh -t ${tags} -f "${files_drs}" -n public/data/MC/
-    sbatch -t 0:10:00 -n 1 --mem 2GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/t2k_utils/tree_merger.sh -t ${tags} -f "${files_treemaker}" -n public/output_hatRecon/root/MC/TreeMaker_
+    sbatch -t 1:00:00 -n 1 --mem 4GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/t2k_utils/tree_merger.sh -t ${tags} -f "${files_drs}" -n public/data/MC/DRS_
+    sbatch -t 1:00:00 -n 1 --mem 4GB --account t2k -p ${machine} --dependency=afterok$job_mc_id $HOME/scripts/t2k_utils/tree_merger.sh -t ${tags} -f "${files_eventAnalysis}" -n public/output_nd280/root/MC/eventAnalysis_
   fi
 fi

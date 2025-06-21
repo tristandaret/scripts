@@ -3,45 +3,59 @@
 run=""
 comment=""
 flags=""
+submit="job"
+machine="htc"
 rm_flag=false
 N=0
 n=0
 
 while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        -N)
-            if [ "$2" ]; then
-                N=$2
-                shift
-            fi
-            ;;
-        -n)
-            if [ "$2" ]; then
-                n=$2
-                shift
-            fi
-            ;;
-        --comment)
-            if [ "$2" ]; then
-                comment=$2
-                shift
-            fi
-            ;;
-        --run)
-            if [ "$2" ]; then
-                run=$2
-                shift
-            fi
-            ;;
-         --rm)
-            rm_flag=true
-            ;;
-        *)
-            echo "Invalid option: $1" >&2
-            exit 1
-            ;;
-    esac
-    shift
+   case $1 in
+      -N)
+         if [ "$2" ]; then
+            N=$2
+            shift
+         fi
+         ;;
+      -n)
+         if [ "$2" ]; then
+            n=$2
+            shift
+         fi
+         ;;
+      --comment)
+         if [ "$2" ]; then
+            comment=$2
+            shift
+         fi
+         ;;
+      --run)
+         if [ "$2" ]; then
+            run=$2
+            shift
+         fi
+         ;;
+      --submit)
+         if [ "$2" ]; then
+            submit=$2
+            shift
+         fi
+         ;;
+      --machine)
+         if [ "$2" ]; then
+            machine=$2
+            shift
+         fi
+         ;;
+      --rm)
+         rm_flag=true
+         ;;
+      *)
+         echo "Invalid option: $1" >&2
+         exit 1
+         ;;
+   esac
+   shift
 done
 
 # Define the number of subruns in each run
@@ -60,14 +74,18 @@ for i in $(seq 0 $imax); do
 done
 
 # Make the flags
+flags="--submit ${submit} --machine ${machine}"
 if [ "$N" -ne 0 ]; then
-   flags="-N ${N} -n ${n}"
+   flags="${flags} -N ${N} -n ${n}"
 fi
+flags="${flags} --comment ${comment}"
 if [ "$rm_flag" = true ]; then
    flags="${flags} --rm"
 fi
-flags="--comment ${comment}"
+
+echo "SUPERSUBMIT FLAGS: ${flags}"
 
 for file in "${files[@]}"; do
-   ./scripts/submit_analysis.sh -d "${file}" ${flags}
+   echo "Submitting ${file}"
+   ./scripts/submit/hat_reco_submit.sh -d "${file}" ${flags}
 done

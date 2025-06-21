@@ -52,7 +52,7 @@ if [ "$drs" = true ] || [ "$all" = true ]; then
 fi
 
 if [ "$hat" = true ] || [ "$all" = true ]; then
-   rm -f $HOME/public/output_hatRecon/root/*/3_HATRecon_*.root
+   rm -f $HOME/public/output_hatRecon/root/*/*hatRecon_*.root
 fi
 
 if [ "$calib" = true ] || [ "$all" = true ]; then
@@ -72,5 +72,5 @@ if [ "$highland" = true ] || [ "$all" = true ]; then
 fi
 
 if [ "$tree" = true ] || [ "$all" = true ]; then
-   rm -f $HOME/public/output_hatRecon/root/*TreeMaker_*.root
+   rm -f $HOME/public/output_hatRecon/root/*/*TreeMaker_*.root
 fi

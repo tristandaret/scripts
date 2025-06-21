@@ -32,4 +32,4 @@ shift $((OPTIND -1))
 
 echo "submit flags: $flags"
 
-sbatch -t 10:00:00 -n 4 --mem 10GB --account t2k $HOME/scripts/utils/nd280_install.sh ${flags}
+sbatch -t 10:00:00 -n 4 --mem 10GB --account t2k $HOME/scripts/t2k_utils/nd280_install.sh ${flags}

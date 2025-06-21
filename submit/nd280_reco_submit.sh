@@ -73,7 +73,7 @@ fi
 
 if [ -z "$datafile" ]; then
 #   datafile="dog1_00001148_0000"
-  datafile="DRS_MC_gamma_600MeV_x-50_y0_z-300_phi0_theta0_N10000"
+  datafile="MC_mu-_400MeV_x0_y75_z-300_phi0_theta0_horizontal_14.29_N5000"
 fi
 
 flags="-d ${datafile}"
@@ -107,11 +107,6 @@ flags="${flags} --tags ${tags}"
 if [[ "$rm_flag" = true ]]; then
   flags="${flags} --rm"
   flags_iter="${flags_iter} --rm"
-fi
-
-# Remove intermediate files
-if [ "$rm_flag" = true ]; then
-  flags="${flags} --rm"
 fi
 
 

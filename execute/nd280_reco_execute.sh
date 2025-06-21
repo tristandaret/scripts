@@ -61,12 +61,11 @@ echo "File used:             ${datafile}"
 
 # Output file names
 if [[ "$datafile" == *"MC"* ]]; then
-   dataflag="${datafile}"
    eventCalib_output="$HOME/public/output_nd280/root/MC/3_eventCalib_${tags}.root"
    eventRecon_output="$HOME/public/output_nd280/root/MC/4_eventRecon_${tags}.root"
    eventAnalysis_output="$HOME/public/output_nd280/root/MC/5_eventAnalysis_${tags}.root"
 else
-   dataflag="-m ${datafile}"
+   datafile="-m ${datafile}"
    eventCalib_output="$HOME/public/output_nd280/root/cosmics/3_eventCalib_${tags}.root"
    eventRecon_output="$HOME/public/output_nd280/root/4_eventRecon_${tags}.root"
    eventAnalysis_output="$HOME/public/output_nd280/root/5_eventAnalysis_${tags}.root"
@@ -87,7 +86,7 @@ fi
 # EventCalib
 echo "eventCalib output:     ${eventCalib_output}"
 echo -e "\n--- STEP 3: EVENTCALIB    ---" > "${logs}"
-time RunEventCalib.exe ${dataflag} -o ${eventCalib_output} ${flags} &>> ${logs}
+time RunEventCalib.exe ${datafile} -o ${eventCalib_output} ${flags} &>> ${logs}
 
 # EventRecon
 echo "eventRecon output:     ${eventRecon_output}"

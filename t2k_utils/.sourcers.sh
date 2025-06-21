@@ -6,7 +6,7 @@ setup_nd280() {
    if [ -n "${1}" ]; then
       version=${1}
    else
-      version=14.29
+      version=14.32
    fi
    echo "SOURCING: ND280Software"
    source /pbs/throng/t2k/t2k_setup.sh
@@ -17,7 +17,7 @@ setup_my_nd280() {
    if [ -n "${1}" ]; then
       version=${1}
    else
-      version=14.31
+      version=14.32
    fi
    echo "SOURCING: my ND280Software"
    echo -e "\nSOURCING: SoftwarePilot"

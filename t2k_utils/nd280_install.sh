@@ -57,7 +57,7 @@ export LD_LIBRARY_PATH=/pbs/throng/t2k/gl2ps/install/lib:$LD_LIBRARY_PATH
 
 if [ "$clone" = true ]; then
    nd280-install -c -j${cores} ${version}
-   cp /pbs/throng/t2k/nd280Software_14.29/ROOT_6.32.02.01/cmake/CMakeLists.txt ROOT_6.32.02.01/cmake
+   cp /pbs/throng/t2k/nd280Software_14.29/ROOT_6.32.02.01/cmake/CMakeLists.txt ROOT_6.32.02.02/cmake
 fi
 
 if [ "$skip" = true ]; then
