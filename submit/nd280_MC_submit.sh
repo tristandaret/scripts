@@ -1,5 +1,17 @@
 #!/bin/bash
-
+#
+# nd280_MC_submit.sh
+# Purpose: Prepare and submit ND280 Monte Carlo particle-gun jobs. Computes
+#          flags and tags then runs the corresponding execute script or submits
+#          batch jobs. This annotated copy documents typical usage.
+#
+# WARNING (Documentation-only):
+#   The script uses cluster submission commands and experiment-specific paths.
+#   It is included for review and should not be executed from this repository.
+#
+# Example (documentation only):
+#   ./nd280_MC_submit.sh -N 100 -n 10 --comment test
+#
 # Default values of flags
 N=500       # number of events
 n=0         # number of events per job

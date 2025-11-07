@@ -1,5 +1,16 @@
 #!/bin/bash
-
+#
+# hat_reco_supersubmit.sh
+# Purpose: Dispatch large-scale production submissions for hat reconstruction.
+#          Typically iterates over configurations and submits many job arrays.
+#
+# WARNING (Documentation-only):
+#   This script is for documentation and should not be executed in this
+#   repository. It references cluster accounts, sbatch and experiment paths.
+#
+# Example (documentation only):
+#   ./hat_reco_supersubmit.sh --run campaign01 --submit job
+#
 run=""
 comment=""
 flags=""

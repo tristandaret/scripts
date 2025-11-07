@@ -1,5 +1,28 @@
 #!/bin/sh
 #
+# particle_gun.sh
+# Purpose: Create Geant4-style particle-gun macro files and run ND280GEANT4SIM to
+#          generate particle gun Monte Carlo events. This script builds a GPS macro
+#          containing one or more particle sources and invokes the simulator.
+#
+# WARNING (Documentation-only):
+#   This repository copy is documented for review and learning. It is NOT intended
+#   to be executed from the public repository because it depends on an external
+#   experiment software stack and data paths. Do not run these scripts here.
+#
+# Usage example (for documentation only):
+#   ./particle_gun.sh -b baseline-2024 -N 100 mu- 600 0 0 0
+#
+# Inputs/flags (illustrative):
+#   -b baseline  - geometry baseline name
+#   -N count     - number of events
+#   --dx/--dy/--dz - vertex box half sizes
+#   -n name      - output filename fragment
+#
+# Notes:
+#   The script originally checks for ND280GEANT4SIM.exe in PATH. All file paths
+#   and binaries are preserved for reference only.
+#
 # Based on /pbs/throng/t2k/nd280Software_14.18/nd280Geant4Sim_7.6/inputs/sim-particule-gun.sh
 #
 # Generate a particle gun with vertices distributed in a box around the central

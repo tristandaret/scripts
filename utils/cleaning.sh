@@ -1,4 +1,16 @@
 #!/bin/bash
+#
+# cleaning.sh
+# Purpose: Remove intermediate logs, ROOT outputs and other derived files from
+#          the analysis workspace. This script demonstrates housekeeping used
+#          in the original environment.
+#
+# WARNING (Documentation-only):
+#   This script deletes files. It is included for documentation; DO NOT run it
+#   from the public repository or on systems that contain real data.
+#
+# Example (documentation only):
+#   ./cleaning.sh --log --gun
 
 plot=false
 log=true

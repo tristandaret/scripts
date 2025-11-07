@@ -1,4 +1,21 @@
 #!/bin/bash
+#
+# hat_MC_submit.sh
+# Purpose: Prepare and submit MC particle-gun jobs (batch or interactive) for the
+#          HAT reconstruction workflow. The script computes flags and tags and
+#          either runs `hat_MC_execute.sh` locally or submits batch jobs.
+#
+# WARNING (Documentation-only):
+#   This copy is annotated for readability and is NOT intended to be executed in
+#   the public repository. It references site-specific batch systems, paths and
+#   experiment software that are not present here.
+#
+# Example (documentation only):
+#   ./hat_MC_submit.sh -N 100 -n 10 --machine htc --comment demo
+#
+# Notes:
+#   - This header documents typical inputs (N, n, particle, kinetic, positions)
+#   - The body below has been kept as-is for reviewers to understand the flow.
 
 # Default values of flags
 N=500       # number of events

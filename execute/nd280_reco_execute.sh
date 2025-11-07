@@ -1,5 +1,17 @@
 #!/bin/bash
-
+#
+# nd280_reco_execute.sh
+# Purpose: Run the ND280 reconstruction sequence (EventCalib, EventRecon,
+#          EventAnalysis) on a supplied data or MC file. This annotated copy
+#          describes flags, inputs and outputs for reviewers.
+#
+# WARNING (Documentation-only):
+#   This script is provided for review only and is NOT intended to be executed
+#   from the public repository — it depends on experiment binaries and data.
+#
+# Example (documentation only):
+#   ./nd280_reco_execute.sh -d myrun.daq -s 0 -n 100 --tags demo
+#
 
 # Tags
 start=0       # starting event

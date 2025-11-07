@@ -1,4 +1,16 @@
 #!/bin/bash
+#
+# treeMaker_beam_execute.sh
+# Purpose: Run HATRECONTREEMAKER on a single beam input file and produce a
+#          documented TreeMaker ROOT output and log. This file is kept here for
+#          inspection and is not intended to be executed from the public repo.
+#
+# WARNING (Documentation-only):
+#   The script references experiment-specific binaries and paths; do not run it
+#   in this repository.
+#
+# Example (documentation only):
+#   ./treeMaker_beam_execute.sh /path/to/hatRecon_output.root
 
 inputFile=$1
 

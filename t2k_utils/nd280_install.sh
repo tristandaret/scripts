@@ -1,4 +1,17 @@
 #!/bin/bash
+#
+# nd280_install.sh
+# Purpose: Install or configure the ND280 software stack used by the original
+#          analyses. This script documents options such as cloning, number of
+#          cores and specific version tags.
+#
+# WARNING (Documentation-only):
+#   Running this script will alter system/user state and expects privileged
+#   network and file-system access. It is included for documentation only and
+#   must NOT be executed from the public repository.
+#
+# Example (documentation only):
+#   ./nd280_install.sh -v master -c -j 8 -d /scratch
 
 version="master"
 clone=false

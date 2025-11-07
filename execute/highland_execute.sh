@@ -1,4 +1,20 @@
 #!/bin/bash
+#
+# highland_execute.sh
+# Purpose: Wrapper to run Highland analysis packages on input ROOT files. Sets up
+#          environment (calls setup_highland) and runs the requested package.
+#
+# WARNING (Documentation-only):
+#   This script is provided for documentation and learning; it is NOT intended to
+#   be executed from the public repository. It references site-specific setup
+#   and build targets.
+#
+# Example (documentation only):
+#   ./highland_execute.sh --pkg gammaHAT -d myfile.root -n 100
+#
+# Notes:
+#   The original script checks/sets up Highland. The operational body is left
+#   as-is below for readers.
 
 if [ -z "$IS_HIGHLAND_SETUP" ] || [ "$IS_HIGHLAND_SETUP" -eq 0 ]; then
    source $HOME/scripts/t2k_utils/.sourcers.sh

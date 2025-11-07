@@ -1,4 +1,16 @@
 #!/bin/bash
+#
+# submit_nd280_install.sh
+# Purpose: Helper wrapper that submits `nd280_install.sh` on a batch system with
+#          convenient sbatch flags. This file exists to show how installation
+#          was run in the original environment and is for documentation only.
+#
+# WARNING (Documentation-only):
+#   The script issues a batch submission which will not work in the public repo
+#   and may alter remote systems. Do not run it here.
+#
+# Example (documentation only):
+#   ./submit_nd280_install.sh -v master -c -j 8
 
 flags=""
 while getopts ":v:csj:d:" opt; do

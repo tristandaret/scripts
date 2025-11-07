@@ -1,4 +1,16 @@
 #!/bin/bash
+#
+# tree_merger.sh
+# Purpose: Merge ROOT files (via `hadd`) and remove intermediate files.
+#          This helper illustrates how outputs were combined after batch jobs.
+#
+# WARNING (Documentation-only):
+#   This script manipulates files and uses `hadd`. It is included for
+#   documentation and should not be executed in the public repository.
+#
+# Example (documentation only):
+#   ./tree_merger.sh -t TAG -f "file1.root file2.root" -n public/data/MC/
+
 #flags (mandatory): -t tag -f files to merge -n output prefix
 
 # Parse command-line arguments

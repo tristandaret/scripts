@@ -1,4 +1,33 @@
 #!/bin/bash
+#
+# hat_MC_execute.sh
+# Purpose: Orchestrates the Monte Carlo (MC) workflow for "hat" reconstruction.
+#          Sequence: particle gun -> detector response simulation -> event calibration
+#          -> hat reconstruction -> TreeMaker. This header documents flags, inputs,
+#          and outputs for readability. The script body below is kept for context.
+#
+# WARNING (Documentation-only):
+#   These scripts are included for documentation and review. They are NOT intended
+#   to be executed from the public repository. Running them without the original
+#   software stack, data, and permissions may be unsafe or ineffective.
+#
+# Usage example (for reading / documentation only):
+#   ./hat_MC_execute.sh -N 100 -p mu- -e 600 --tags demo
+#
+# Inputs:
+#   - Command-line flags parsed in the script (examples): -N, -p, -e, -x, -y, -z,
+#     --dx, --dy, --dz, --phi, --dphi, --theta, --dtheta, --tags, -i, --rm
+#   - Environment variables and binaries expected in the original environment
+#     (e.g., DETRESPONSESIM.exe, RunEventCalib.exe, hatRecon binaries under $HOME).
+#
+# Outputs (as used in this script):
+#   - ROOT files written under $HOME/public/data/MC and $HOME/public/output_hatRecon
+#   - A log file under $HOME/public/output_hatRecon/logs
+#
+# Notes:
+#   - This header was added to make the repository understandable when viewed.
+#   - Do not rely on the paths or binaries shown here; they point to the original
+#     working environment and are preserved for reference only.
 
 ### Default configuration: focused horizontal beam of 600 MeV muons
 # Gun type

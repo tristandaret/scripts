@@ -1,5 +1,17 @@
 #!/bin/bash
-
+#
+# nd280_MC_execute.sh
+# Purpose: Execute a standard MC particle-gun -> detector simulation -> recon
+#          chain targeted to ND280 workflows. This script documents expected
+#          flags, default parameters and outputs for reviewers.
+#
+# WARNING (Documentation-only):
+#   This repository copy is for documentation and is NOT intended to be executed
+#   from the public repo. It references experiment binaries and local paths.
+#
+# Example (documentation only):
+#   ./nd280_MC_execute.sh -N 100 -p gamma -e 600 --tags demo
+#
 ### Default configuration: focused horizontal beam of 600 MeV muons
 # Gun type
 N=100

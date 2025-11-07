@@ -1,5 +1,17 @@
 #!/bin/bash
-
+#
+# nd280_reco_submit.sh
+# Purpose: Submit ND280 reconstruction jobs (interactive or batch). This
+#          annotated version documents flags, splitting behavior and merging.
+#
+# WARNING (Documentation-only):
+#   This script references experiment tools, cluster submission commands and
+#   site-specific paths. It is included for documentation and should not be run
+#   from the public repository.
+#
+# Example (documentation only):
+#   ./nd280_reco_submit.sh -d MC_file -n 100 --machine htc
+#
 # Default values of flags
 start=0         # starting event
 N=500       # number of events

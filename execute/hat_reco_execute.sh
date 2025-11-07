@@ -1,4 +1,21 @@
 #!/bin/bash
+#
+# hat_reco_execute.sh
+# Purpose: Run the HAT reconstruction step(s) on input data/MC and support
+#          optional flags (SR/AC removal, removal of intermediates). This file
+#          documents common flags and expected behavior of the reconstruction
+#          execution wrapper.
+#
+# WARNING (Documentation-only):
+#   This copy is documented for clarity and is NOT intended to be executed from
+#   the public repository. It references experiment binaries, paths, and
+#   environment setup that are not available here.
+#
+# Example (documentation only):
+#   ./hat_reco_execute.sh -s 0 -n 100 --tags example
+#
+# Notes:
+#   - Keep the original body for reviewers; paths and binaries may be site-specific.
 
 # Number of events
 start=0 # starting from event #

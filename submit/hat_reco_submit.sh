@@ -1,4 +1,17 @@
 #!/bin/bash
+#
+# hat_reco_submit.sh
+# Purpose: Prepare and submit HAT reconstruction jobs (local or batch). This
+#          annotated wrapper calculates flags, handles splitting and merging
+#          and optionally builds hatRecon before submission.
+#
+# WARNING (Documentation-only):
+#   This file is for repository documentation and should NOT be executed here.
+#   It assumes a system scheduler, site-specific accounts and experiment setup.
+#
+# Example (documentation only):
+#   ./hat_reco_submit.sh -d myfile.root --submit job --machine htc
+#
 
 start=0       # starting event
 N=0           # number of events analyzed (0: all)

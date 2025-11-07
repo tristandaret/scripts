@@ -1,4 +1,17 @@
 #!/bin/bash
+#
+# rename.sh
+# Purpose: Small utility to rename files in a directory by replacing a search
+#          string with a replacement. Provided as an example of small helper
+#          utilities used in the analysis workflow.
+#
+# WARNING (Documentation-only):
+#   This script renames files on disk. It is included for review and should not
+#   be executed on real data in the public repo without understanding the
+#   consequences.
+#
+# Example (documentation only):
+#   ./rename.sh -s oldtag -r newtag -d ./outputs
 
 # Function to display usage instructions
 usage() {
